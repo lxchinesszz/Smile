@@ -98,6 +98,22 @@ public class URLTools {
         return queryParameter;
     }
 
+    public static Map<String, Object> getQueryParameterFromContent(String queryContent) {
+        Map<String, Object> queryParameter = new LinkedHashMap<>();
+        Iterable<String> split = Splitter.on("&").split(queryContent);
+        split.forEach(queryParam -> {
+            if (StringTools.isEmpty(queryParam)){
+                return;
+            }
+            String[] params = queryParam.split("=");
+            params[1] = Default.defaultValue(params[1], "",String.class);
+            queryParameter.put(params[0], params[1]);
+        });
+        return queryParameter;
+    }
+
+
+
 
     public static void main(String[] args) {
         System.out.println(getPort("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age"));//3201
@@ -105,6 +121,8 @@ public class URLTools {
         System.out.println(getAuthority("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&sd=23"));//blog.csdn.net:3201
         System.out.println(getPath("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&sd=23"));///yongh701/article/details/46894417
         System.out.println(JsonUtils.toJson(getQueryParameter("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&")));
+
+        System.out.println(getPath("/smile/get?orderId=2334"));
     }
 
 }

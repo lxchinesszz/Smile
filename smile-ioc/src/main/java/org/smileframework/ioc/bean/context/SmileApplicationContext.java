@@ -1,9 +1,7 @@
 package org.smileframework.ioc.bean.context;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.smileframework.ioc.bean.annotation.InsertBean;
 import org.smileframework.ioc.bean.annotation.SmileBean;
 import org.smileframework.ioc.bean.annotation.SmileComponent;

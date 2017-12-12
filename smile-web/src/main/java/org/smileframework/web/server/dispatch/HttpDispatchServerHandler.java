@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.*;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
+import org.smileframework.tool.http.URLTools;
 import org.smileframework.tool.logmanage.LoggerManager;
 import org.smileframework.web.annotation.RequestMethod;
 import org.smileframework.web.handler.WebDefinition;
@@ -20,7 +21,6 @@ import org.smileframework.web.util.NettyResponse;
 import org.smileframework.web.util.WebContextTools;
 import org.smileframework.web.util.WebTools;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,8 +49,9 @@ public class HttpDispatchServerHandler extends SimpleChannelInboundHandler<HttpO
 
     /**
      * 1）客户端连接服务端
-     2）在客户端的的ChannelPipeline中加入一个比较特殊的IdleStateHandler，设置一下客户端的写空闲时间，例如5s
-     3）当客户端的所有ChannelHandler中4s内没有write事件，则会触发userEventTriggered方法（上文介绍过）
+     * 2）在客户端的的ChannelPipeline中加入一个比较特殊的IdleStateHandler，设置一下客户端的写空闲时间，例如5s
+     * 3）当客户端的所有ChannelHandler中4s内没有write事件，则会触发userEventTriggered方法（上文介绍过）
+     *
      * @param ctx
      * @param evt
      * @throws Exception
@@ -89,16 +90,14 @@ public class HttpDispatchServerHandler extends SimpleChannelInboundHandler<HttpO
             String methodName = request.getMethod().name();
             dispatchUrl = req.getUri();
             String randomUUID = UUID.randomUUID().toString().replaceAll("-", "");
-            Map<String, String> requestParams = new ConcurrentHashMap<>();
+            Map<String, Object> requestParams = new ConcurrentHashMap<>();
             // 处理get请求
             if (methodName.equalsIgnoreCase("GET")) {
-                QueryStringDecoder decoder = new QueryStringDecoder(dispatchUrl);
-                Map<String, List<String>> parame = decoder.parameters();
-                Iterator<Map.Entry<String, List<String>>> iterator = parame.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    Map.Entry<String, List<String>> next = iterator.next();
-                    requestParams.put(next.getKey(), next.getValue().get(0));
-                }
+                String queryContent = dispatchUrl.substring(dispatchUrl.indexOf("?")+1);
+                Map<String, Object> queryParameterFromContent = URLTools.getQueryParameterFromContent(queryContent);
+                queryParameterFromContent.entrySet().forEach(entry -> {
+                    requestParams.put(entry.getKey(), entry.getValue());
+                });
             }
             // 处理POST请求
             if (methodName.equalsIgnoreCase("POST")) {
@@ -112,15 +111,15 @@ public class HttpDispatchServerHandler extends SimpleChannelInboundHandler<HttpO
                     }
                 }
             }
-
+            dispatchUrl = dispatchUrl.substring(0, dispatchUrl.indexOf("?"));
             RequestMethod requestMethod = WebTools.getRequestMethod(methodName);
             WebDefinition webDefinition = WebContextTools.getWebDefinitionByUrl(dispatchUrl, requestMethod);
-            if (webDefinition instanceof Web404Definition){
-                NettyResponse.writeResponse(ctx.channel(),"Not Found",HttpResponseStatus.NOT_FOUND);
+            if (webDefinition instanceof Web404Definition) {
+                NettyResponse.writeResponse(ctx.channel(), "Not Found", HttpResponseStatus.NOT_FOUND);
                 return;
             }
-            if (webDefinition instanceof Web405Definition){
-                NettyResponse.writeResponse(ctx.channel(),"Method Not Allowed",HttpResponseStatus.METHOD_NOT_ALLOWED);
+            if (webDefinition instanceof Web405Definition) {
+                NettyResponse.writeResponse(ctx.channel(), "Method Not Allowed", HttpResponseStatus.METHOD_NOT_ALLOWED);
                 return;
             }
             /**

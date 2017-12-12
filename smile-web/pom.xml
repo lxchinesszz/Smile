@@ -5,7 +5,7 @@
     <parent>
         <artifactId>org.smileframework.boot</artifactId>
         <groupId>org.smileframework.boot</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.smileframework.web</artifactId>
@@ -17,13 +17,13 @@
         <dependency>
             <groupId>org.smileframework.boot</groupId>
             <artifactId>org.smileframework.tool</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.smileframework.boot</groupId>
             <artifactId>org.smileframework.ioc</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
 
 
@@ -44,6 +44,12 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.0.24.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
         </dependency>
 
     </dependencies>

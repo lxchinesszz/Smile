@@ -4,7 +4,7 @@ import javassist.*;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
-
+import org.smileframework.tool.clazz.Demo;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -17,7 +17,8 @@ import java.util.Arrays;
  */
 public class LocalVariableTableParameterName {
 
-    public static String[] getParameterNames(Method method){
+
+    public static String[] getParameterNames(Method method) {
         //declar不局限与修饰符
         Class clazz = method.getDeclaringClass();
         String methodName = method.getName();
@@ -47,34 +48,22 @@ public class LocalVariableTableParameterName {
         return paramNames;
     }
 
-    public static void main(String[] args)throws Exception{
-        Method method = org.smileframework.tool.clazz.LocalVariableTableParameterName.class.getMethods()[1];
-        org.smileframework.tool.clazz.LocalVariableTableParameterName localVariableTableParameterName = new org.smileframework.tool.clazz.LocalVariableTableParameterName();
-        String[] parameterNames = localVariableTableParameterName.getParameterNames(method);
-        Arrays.asList(parameterNames).forEach(x->{
-            System.out.println(x);
+
+
+    public static void main(String[] args) throws Exception {
+        Demo demo = new Demo();
+        String name = demo.getClass().getPackage().getName();
+        System.out.println(name);
+        Method[] declaredMethods = demo.getClass().getDeclaredMethods();
+
+        Arrays.stream(declaredMethods).forEach(method -> {
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            Arrays.stream(parameterTypes).forEach(e -> {
+                boolean assignableFrom = e.isAssignableFrom(int.class);
+                System.out.println(e.getName() + "--" + assignableFrom + "--" + e.getTypeName());
+            });
         });
-//        Demo demo = new Demo();
-//        Method[] methods = demo.getClass().getDeclaredMethods();
-//        Class clazz = methods[0].getDeclaringClass();
-//        String methodName = methods[0].getName();
-//        ClassPool pool = ClassPool.getDefault();
-//        pool.insertClassPath(new ClassClassPath(clazz));
-//        CtClass cc = pool.get(clazz.getName());
-//        CtMethod cm = cc.getDeclaredMethod(methodName);
-//        MethodInfo methodInfo = cm.getMethodInfo();
-//        CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
-//        LocalVariableAttribute attr =
-//                (LocalVariableAttribute) codeAttribute.getAttribute(LocalVariableAttribute.tag);
-//        if (attr == null) {
-//            System.out.println("params is null");
-//        }
-//        String[] paramNames = new String[cm.getParameterTypes().length];
-//        int pos = Modifier.isStatic(cm.getModifiers()) ? 0 : 1;
-//        for (int i = 0; i < paramNames.length; i++)
-//            paramNames[i] = attr.variableName(i + pos);
-//        for (int i = 0; i < paramNames.length; i++) {
-//            System.out.println(paramNames[i]);
-//        }
+
+
     }
 }

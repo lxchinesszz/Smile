@@ -3,7 +3,6 @@ package org.smileframework.tool.clazz;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smileframework.tool.string.StringTools;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -72,6 +71,7 @@ public class ClassUtils {
                     }
                     if (isPrintCLass){
                         LOGGER.info(jarEntryName);
+//                        System.out.println("print:"+jarEntryName);
                     }
                     String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replaceAll("/", ".");
                     classes.add(loadClass(className, false, classLoader));

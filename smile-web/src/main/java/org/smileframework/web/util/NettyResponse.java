@@ -64,17 +64,21 @@ public class NettyResponse {
 
 
     /**
-     *
      * @param channel
      * @param messageRequest
      * @param messageResponse
      * @param futureListener
      */
-    public static void writeResponseAndListener(Channel channel, MessageRequest messageRequest, MessageResponse messageResponse,GenericFutureListener<? extends Future<? super Void>>futureListener ) {
-        String strVar = messageResponse.getResult();
+    public static void writeResponseAndListener(Channel channel, MessageRequest messageRequest, MessageResponse messageResponse, GenericFutureListener<? extends Future<? super Void>> futureListener) {
         HttpResponseStatus httpResponseStatus = messageResponse.getHttpResponseStatus();
+        String strVar = "";
+        if (httpResponseStatus.code() == 200) {
+            strVar = messageResponse.getResult();
+        } else {
+            strVar = messageResponse.getError();
+        }
         ByteBuf buf = copiedBuffer(strVar.toString(), CharsetUtil.UTF_8);
-        String contentType = messageRequest.getWebDefinition().getConsumes();
+        String contentType = messageResponse.getContentType();
         //连接结束的时候返回true响应信息
         //构建响应对象
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, httpResponseStatus, buf);
