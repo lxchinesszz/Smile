@@ -7,6 +7,7 @@ import javassist.bytecode.MethodInfo;
 import org.smileframework.tool.clazz.CastConvert;
 import org.smileframework.tool.clazz.ReflectionUtils;
 import org.smileframework.tool.string.StringTools;
+import org.smileframework.web.annotation.RequestBoby;
 import org.smileframework.web.annotation.RequestParam;
 
 import java.lang.annotation.Annotation;
@@ -66,36 +67,48 @@ public class ControllerUtils {
         return null;
     }
 
-    public static Object[] getArgs(Method method, Map<String, Object> requestParameter) {
+    public static Object[] getArgs(Method method, Map<String, Object> requestParameter) throws Exception {
         List<ReflectionUtils.ParamDefinition> parameterDefinitions = ReflectionUtils.getParameterDefinitions(method);
         Object[] args = new Object[parameterDefinitions.size()];
         Object requestParam;
         for (int i = 0; i < parameterDefinitions.size(); i++) {
             //参数描述
             ReflectionUtils.ParamDefinition paramDefinition = parameterDefinitions.get(i);
-            Annotation annotation = getAnnotation(paramDefinition.getDeclaredAnnotations(), RequestParam.class);
-            if (annotation != null) {
+            Annotation isRequestParam = getAnnotation(paramDefinition.getDeclaredAnnotations(), RequestParam.class);
+            Annotation isRequestBody = getAnnotation(paramDefinition.getDeclaredAnnotations(), RequestBoby.class);
+            if (isRequestParam != null) {
                 //当使用RequestParam 则value必须指定
-                String requestName = ((RequestParam) annotation).value();
-                String requestValue =(String) requestParameter.get(requestName);
+                String requestName = ((RequestParam) isRequestParam).value();
+                String requestValue = (String) requestParameter.get(requestName);
                 if (StringTools.isEmpty(requestValue)) {
                     throw new IllegalArgumentException("缺少请求参数:" + requestName);
                 }
                 String argIndexStr = paramDefinition.getArgIndex();
                 int argIndex = Integer.parseInt(argIndexStr);
                 //转换参数类型
-                requestParam= CastConvert.cast(paramDefinition.getParamType(),requestValue);
+                requestParam = CastConvert.cast(paramDefinition.getParamType(), requestValue);
                 args[argIndex] = requestParam;
-            } else {
-                String requestName =paramDefinition.getParamName();
-                String requestValue = (String)requestParameter.get(requestName);
+            } else if(isRequestBody != null){
+                String requestValue = (String) requestParameter.get("BODY");
+                if (StringTools.isEmpty(requestValue)) {
+                    throw new IllegalArgumentException("请检查请求体参数信息");
+                }
+                String argIndexStr = paramDefinition.getArgIndex();
+                int argIndex = Integer.parseInt(argIndexStr);
+                //转换参数类型
+                requestParam = CastConvert.cast(paramDefinition.getParamType(), requestValue);
+                args[argIndex] = requestParam;
+            }
+            else {
+                String requestName = paramDefinition.getParamName();
+                String requestValue = (String) requestParameter.get(requestName);
                 if (StringTools.isEmpty(requestValue)) {
                     throw new IllegalArgumentException("缺少请求参数:" + requestName);
                 }
                 String argIndexStr = paramDefinition.getArgIndex();
                 int argIndex = Integer.parseInt(argIndexStr);
                 //转换参数类型
-                requestParam= CastConvert.cast(paramDefinition.getParamType(),requestValue);
+                requestParam = CastConvert.cast(paramDefinition.getParamType(), requestValue);
                 args[argIndex] = requestParam;
             }
         }

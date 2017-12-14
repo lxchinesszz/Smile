@@ -10,6 +10,7 @@ import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.smileframework.tool.http.URLTools;
 import org.smileframework.tool.logmanage.LoggerManager;
+import org.smileframework.tool.string.StringTools;
 import org.smileframework.web.annotation.RequestMethod;
 import org.smileframework.web.handler.WebDefinition;
 import org.smileframework.web.server.modle.MessageRequest;
@@ -21,9 +22,7 @@ import org.smileframework.web.util.NettyResponse;
 import org.smileframework.web.util.WebContextTools;
 import org.smileframework.web.util.WebTools;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.netty.buffer.Unpooled.copiedBuffer;
@@ -87,13 +86,14 @@ public class HttpDispatchServerHandler extends SimpleChannelInboundHandler<HttpO
             headers.entries().stream().forEach(x -> {
                 headerMaps.put(x.getKey(), x.getValue());
             });
+            String contentType = request.headers().get("Content-Type");
             String methodName = request.getMethod().name();
             dispatchUrl = req.getUri();
             String randomUUID = UUID.randomUUID().toString().replaceAll("-", "");
             Map<String, Object> requestParams = new ConcurrentHashMap<>();
             // 处理get请求
             if (methodName.equalsIgnoreCase("GET")) {
-                String queryContent = dispatchUrl.substring(dispatchUrl.indexOf("?")+1);
+                String queryContent = dispatchUrl.substring(dispatchUrl.indexOf("?") + 1);
                 Map<String, Object> queryParameterFromContent = URLTools.getQueryParameterFromContent(queryContent);
                 queryParameterFromContent.entrySet().forEach(entry -> {
                     requestParams.put(entry.getKey(), entry.getValue());
@@ -101,17 +101,28 @@ public class HttpDispatchServerHandler extends SimpleChannelInboundHandler<HttpO
             }
             // 处理POST请求
             if (methodName.equalsIgnoreCase("POST")) {
-                HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(
-                        new DefaultHttpDataFactory(false), req);
-                List<InterfaceHttpData> postData = decoder.getBodyHttpDatas(); //
-                for (InterfaceHttpData data : postData) {
-                    if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
-                        MemoryAttribute attribute = (MemoryAttribute) data;
-                        requestParams.put(attribute.getName(), attribute.getValue());
+                if (StringTools.endsWithIgnoreCase(contentType, "application/json")) {
+                    FullHttpRequest request1 = (FullHttpRequest) msg;
+                    ByteBuf jsonBuf = request1.content();
+                    String jsonStr = jsonBuf.toString(CharsetUtil.UTF_8).replaceAll("\\\\s*|\\t|\\r|\\n", "");
+                    if (!StringTools.isEmpty(jsonStr)) {
+                        requestParams.put("BODY", jsonStr);
+                    }
+                } else {
+                    HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(
+                            new DefaultHttpDataFactory(false), req);
+                    List<InterfaceHttpData> postData = decoder.getBodyHttpDatas(); //
+                    for (InterfaceHttpData data : postData) {
+                        if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
+                            MemoryAttribute attribute = (MemoryAttribute) data;
+                            requestParams.put(attribute.getName(), attribute.getValue());
+                        }
                     }
                 }
             }
-            dispatchUrl = dispatchUrl.substring(0, dispatchUrl.indexOf("?"));
+            if (StringTools.contains(dispatchUrl,"?")){
+                dispatchUrl = dispatchUrl.substring(0, dispatchUrl.indexOf("?"));
+            }
             RequestMethod requestMethod = WebTools.getRequestMethod(methodName);
             WebDefinition webDefinition = WebContextTools.getWebDefinitionByUrl(dispatchUrl, requestMethod);
             if (webDefinition instanceof Web404Definition) {
@@ -120,6 +131,11 @@ public class HttpDispatchServerHandler extends SimpleChannelInboundHandler<HttpO
             }
             if (webDefinition instanceof Web405Definition) {
                 NettyResponse.writeResponse(ctx.channel(), "Method Not Allowed", HttpResponseStatus.METHOD_NOT_ALLOWED);
+                return;
+            }
+            String consumes = webDefinition.getConsumes();
+            if (!contentType.equalsIgnoreCase(consumes)&StringTools.isNotEmpty(consumes)){
+                NettyResponse.writeResponse(ctx.channel(), "Bad Request (The content-type don't match)", HttpResponseStatus.BAD_REQUEST);
                 return;
             }
             /**
@@ -141,22 +157,6 @@ public class HttpDispatchServerHandler extends SimpleChannelInboundHandler<HttpO
         }
     }
 
-
-    /**
-     * 当未发现路径，返回提示
-     *
-     * @param ctx
-     */
-    private void writeMenu(ChannelHandlerContext ctx) {
-        String strVar = "{code:2000,message:\"check the url\"}";
-        ByteBuf buf = copiedBuffer(strVar, CharsetUtil.UTF_8);
-        FullHttpResponse response = new DefaultFullHttpResponse(
-                HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
-        response.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
-        response.headers().set(CONTENT_LENGTH, buf.readableBytes());
-        ctx.channel().writeAndFlush(response);
-
-    }
 
     /**
      * exceptionCaught() 事件处理方法是当出现 Throwable 对象才会被调用，

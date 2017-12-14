@@ -51,20 +51,20 @@ public class LocalMessageTask implements Callable<Boolean> {
         Method method = webDefinition.getMethod();
         Object controller = webDefinition.getController();
         String produces = webDefinition.getProduces();
-        //方法的形参名称 ,需要从查看参数中是否包括这个字段
-        String[] parameterNames = LocalVariableTableParameterName.getParameterNames(method);
-        Arrays.stream(parameterNames).forEach(paramKey -> {
-            Object paramValue = parameters.get(paramKey);
-            if (paramValue == null) {
-                messageResponse.setHttpResponseStatus(HttpResponseStatus.BAD_REQUEST);
-                messageResponse.setError("{\"code\":-1,\"message\":\"缺少请求参数:" + paramKey + "\"}");
-            }
-        });
+        //FIXME 移除参数中判断,提前获取转换类
+        //FIXME 下期优化方案,将arg参数,耗时操作在其他地方
+        //将统一操作模块化
+        Object[] args=null;
+        try {
+            args = ControllerUtils.getArgs(method, parameters);
+        } catch (Exception e) {
+            messageResponse.setHttpResponseStatus(HttpResponseStatus.BAD_REQUEST);
+            messageResponse.setError("{\"code\":-1,\"message\":\"" + e.getMessage() + "\"}");
+        }
+        logger.debug("请求参数:{}", JsonUtils.toJson(args));
         if (StringTools.isNotEmpty(messageResponse.getError())) {
             return true;
         }
-        Object[] args = ControllerUtils.getArgs(method, parameters);
-        logger.debug("请求参数:{}", JsonUtils.toJson(args));
         Object invokeResult = method.invoke(controller, args);
         String result = "";
         if (produces.equalsIgnoreCase("application/json")) {

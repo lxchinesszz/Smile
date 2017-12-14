@@ -11,6 +11,8 @@ import org.smileframework.ioc.util.SmileServerReturn;
 import org.smileframework.tool.clazz.ClassUtils;
 import org.smileframework.tool.date.StopWatch;
 import org.smileframework.tool.logmanage.LoggerManager;
+import org.smileframework.tool.proxy.CGLibProxy;
+import org.smileframework.tool.proxy.SmileProxyAspect;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -157,7 +159,6 @@ public class SmileApplicationContext implements ApplicationContext {
         extApplicationContexts.forEach(ext -> {
             ext.mergeContext(new ConfigurableApplicationContext(registeredBeans, configurableEnvironment, stopWatch));
         });
-        SmileServerReturn.Start();
         return new ConfigurableApplicationContext(registeredBeans, configurableEnvironment, stopWatch);
     }
 
@@ -222,6 +223,13 @@ public class SmileApplicationContext implements ApplicationContext {
             }
             try {
                 beanInstance = nextCls.newInstance();
+                /**
+                 * 判断是否包括代理注解,如过包括就生成代理对象
+                 */
+                SmileProxyAspect smileProxyAspect = (SmileProxyAspect) nextCls.getAnnotation(SmileProxyAspect.class);
+                if (smileProxyAspect != null) {
+                    beanInstance = CGLibProxy.instance().setProxyObject(beanInstance).toProxyObject(nextCls);
+                }
                 String beanName = declaredAnnotation.vlaue();
                 if (beanName.isEmpty()) {
                     beanName = nextCls.getSimpleName();

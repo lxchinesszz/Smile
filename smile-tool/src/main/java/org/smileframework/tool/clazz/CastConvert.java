@@ -10,7 +10,6 @@ import org.smileframework.tool.json.JsonUtils;
  */
 public class CastConvert {
     public static Object cast(Class cls, String value) {
-        System.out.println(cls.hashCode() == int.class.hashCode());
         int targetHashCode = cls.hashCode();
         if (targetHashCode == int.class.hashCode()) {
             return Integer.parseInt(value);

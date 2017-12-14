@@ -2,6 +2,7 @@ package org.smileframework.ioc.bean.context;
 
 
 import org.smileframework.ioc.bean.annotation.SmileBootApplication;
+import org.smileframework.ioc.util.SmileServerReturn;
 
 /**
  * @Package: pig.boot.ioc.context
@@ -32,6 +33,7 @@ public class SmileApplication {
          * 然后有initialize去执行SmileApplication中的scan方法去根据基础目录,加载子目录下的class文件及jar文件
          * 构建bean描述类BeanDefinition,最后构建出IOC
          */
+        SmileServerReturn.Start();
         return simpleApplicationContextInitializer.initialize(smileApplicationContext);
     }
 
