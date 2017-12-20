@@ -46,14 +46,14 @@ public class WebApplicationContext implements ExtApplicationContext {
     @Override
     public void mergeContext(ConfigApplicationContext extApplicationContext) {
         configApplicationContext = extApplicationContext;
-        //TODO 获取上下文,绑定url controllerAnnotation
+        //获取上下文,绑定url controllerAnnotation
         Map<String, BeanDefinition> controllerBeans = configApplicationContext.getBeanByAnnotation(RestController.class);
-        //TODO url和beanDefiniton
+        // url和beanDefiniton
         bindUrlAndHandler(controllerBeans);
         WebContextTools.setWebApplicationContext(this);
         NettyBootstrapServer server = new NettyBootstrapServer();
         ConfigurableEnvironment configurableEnvironment = extApplicationContext.getConfigurableEnvironment();
-        Integer port = Integer.parseInt(configurableEnvironment.getProperty("server.port"));
+        Integer port = Integer.parseInt(configurableEnvironment.getProperty("server.port","10086"));
         String pid = getPid();
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -88,7 +88,7 @@ public class WebApplicationContext implements ExtApplicationContext {
         }
         RequestMethod value = orDefault.getValue();
         if (!StringTools.endsWithIgnoreCase(value.name(), requestMethod.name())) {
-            //FIXME 返回默认处理器,用来返回405错误
+            //返回默认处理器,用来返回405错误
             return new Web405Definition();
         }
         return orDefault;

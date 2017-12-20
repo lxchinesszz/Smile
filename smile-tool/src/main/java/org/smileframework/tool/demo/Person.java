@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @Package: smile.demo
- * @Description: ${todo}
+ * @Description:
  * @author: liuxin
  * @date: 2017/11/22 下午3:16
  */

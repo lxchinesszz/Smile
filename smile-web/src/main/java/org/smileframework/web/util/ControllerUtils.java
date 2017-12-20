@@ -5,10 +5,12 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
 import org.smileframework.tool.clazz.CastConvert;
-import org.smileframework.tool.clazz.ReflectionUtils;
+import org.smileframework.tool.clazz.ReflectionTools;
 import org.smileframework.tool.string.StringTools;
 import org.smileframework.web.annotation.RequestBoby;
+import org.smileframework.web.annotation.RequestHeader;
 import org.smileframework.web.annotation.RequestParam;
+import org.smileframework.web.handler.WebDefinition;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -67,15 +69,25 @@ public class ControllerUtils {
         return null;
     }
 
-    public static Object[] getArgs(Method method, Map<String, Object> requestParameter) throws Exception {
-        List<ReflectionUtils.ParamDefinition> parameterDefinitions = ReflectionUtils.getParameterDefinitions(method);
+
+    /**
+     * 参数描述在加载url时候,统一处理
+     * @param webDefinition
+     * @param requestParameter
+     * @param headers
+     * @return
+     * @throws Exception
+     */
+    public static Object[] getArgs(WebDefinition webDefinition, Map<String, Object> requestParameter, Map<String, Object> headers) throws Exception {
+        List<ReflectionTools.ParamDefinition> parameterDefinitions = webDefinition.getParamDefinitions();
         Object[] args = new Object[parameterDefinitions.size()];
         Object requestParam;
         for (int i = 0; i < parameterDefinitions.size(); i++) {
             //参数描述
-            ReflectionUtils.ParamDefinition paramDefinition = parameterDefinitions.get(i);
+            ReflectionTools.ParamDefinition paramDefinition = parameterDefinitions.get(i);
             Annotation isRequestParam = getAnnotation(paramDefinition.getDeclaredAnnotations(), RequestParam.class);
             Annotation isRequestBody = getAnnotation(paramDefinition.getDeclaredAnnotations(), RequestBoby.class);
+            Annotation isRequestHeader = getAnnotation(paramDefinition.getDeclaredAnnotations(), RequestHeader.class);
             if (isRequestParam != null) {
                 //当使用RequestParam 则value必须指定
                 String requestName = ((RequestParam) isRequestParam).value();
@@ -98,6 +110,73 @@ public class ControllerUtils {
                 //转换参数类型
                 requestParam = CastConvert.cast(paramDefinition.getParamType(), requestValue);
                 args[argIndex] = requestParam;
+            }else if (isRequestHeader!=null){
+                String argIndexStr = paramDefinition.getArgIndex();
+                int argIndex = Integer.parseInt(argIndexStr);
+                //转换参数类型
+                args[argIndex] = headers;
+            }
+            else {
+                String requestName = paramDefinition.getParamName();
+                String requestValue = (String) requestParameter.get(requestName);
+                if (StringTools.isEmpty(requestValue)) {
+                    throw new IllegalArgumentException("缺少请求参数:" + requestName);
+                }
+                String argIndexStr = paramDefinition.getArgIndex();
+                int argIndex = Integer.parseInt(argIndexStr);
+                //转换参数类型
+                requestParam = CastConvert.cast(paramDefinition.getParamType(), requestValue);
+                args[argIndex] = requestParam;
+            }
+        }
+        return args;
+    }
+
+    /**
+     *
+     * @param method
+     * @param requestParameter
+     * @param headers
+     * @return
+     * @throws Exception
+     */
+    public static Object[] getArgs(Method method, Map<String, Object> requestParameter,Map<String, Object> headers) throws Exception {
+        List<ReflectionTools.ParamDefinition> parameterDefinitions = ReflectionTools.getParameterDefinitions(method);
+        Object[] args = new Object[parameterDefinitions.size()];
+        Object requestParam;
+        for (int i = 0; i < parameterDefinitions.size(); i++) {
+            //参数描述
+            ReflectionTools.ParamDefinition paramDefinition = parameterDefinitions.get(i);
+            Annotation isRequestParam = getAnnotation(paramDefinition.getDeclaredAnnotations(), RequestParam.class);
+            Annotation isRequestBody = getAnnotation(paramDefinition.getDeclaredAnnotations(), RequestBoby.class);
+            Annotation isRequestHeader = getAnnotation(paramDefinition.getDeclaredAnnotations(), RequestHeader.class);
+            if (isRequestParam != null) {
+                //当使用RequestParam 则value必须指定
+                String requestName = ((RequestParam) isRequestParam).value();
+                String requestValue = (String) requestParameter.get(requestName);
+                if (StringTools.isEmpty(requestValue)) {
+                    throw new IllegalArgumentException("缺少请求参数:" + requestName);
+                }
+                String argIndexStr = paramDefinition.getArgIndex();
+                int argIndex = Integer.parseInt(argIndexStr);
+                //转换参数类型
+                requestParam = CastConvert.cast(paramDefinition.getParamType(), requestValue);
+                args[argIndex] = requestParam;
+            } else if(isRequestBody != null){
+                String requestValue = (String) requestParameter.get("BODY");
+                if (StringTools.isEmpty(requestValue)) {
+                    throw new IllegalArgumentException("请检查请求体参数信息");
+                }
+                String argIndexStr = paramDefinition.getArgIndex();
+                int argIndex = Integer.parseInt(argIndexStr);
+                //转换参数类型
+                requestParam = CastConvert.cast(paramDefinition.getParamType(), requestValue);
+                args[argIndex] = requestParam;
+            }else if (isRequestHeader!=null){
+                String argIndexStr = paramDefinition.getArgIndex();
+                int argIndex = Integer.parseInt(argIndexStr);
+                //转换参数类型
+                args[argIndex] = headers;
             }
             else {
                 String requestName = paramDefinition.getParamName();
@@ -116,11 +195,3 @@ public class ControllerUtils {
     }
 }
 
-/*
-    Class<?>[] parameterTypes = getParameterTypes(method);
-    String[] parameterNames = getParameterNames(method);
-    int length = parameterNames.length;
-                for (int var = 0; var < length; var++) {
-        String parameterName = parameterNames[var];
-        args[i] = parameterTypes[i].cast(requestParameter.get(parameterName));
-        }*/

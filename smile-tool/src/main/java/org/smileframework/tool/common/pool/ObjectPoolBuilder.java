@@ -52,6 +52,7 @@ public class ObjectPoolBuilder<T> {
         System.out.println(objectPool3.borrowObject().hashCode());
         System.out.println(objectPool3.borrowObject().hashCode());
         System.out.println(objectPool3.borrowObject().hashCode());
+//        objectPool3.returnObject();
         System.out.println(config.getMaxIdle());
 
     }

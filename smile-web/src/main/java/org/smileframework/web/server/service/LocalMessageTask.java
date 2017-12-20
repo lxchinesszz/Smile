@@ -46,6 +46,7 @@ public class LocalMessageTask implements Callable<Boolean> {
     @Override
     public Boolean call() throws Exception {
         Map<String, Object> parameters = messageRequest.getParameters();
+        Map<String, Object> headers = messageRequest.getHeaders();
         WebDefinition webDefinition = messageRequest.getWebDefinition();
         messageResponse.setContentType(webDefinition.getProduces());
         Method method = webDefinition.getMethod();
@@ -56,7 +57,7 @@ public class LocalMessageTask implements Callable<Boolean> {
         //将统一操作模块化
         Object[] args=null;
         try {
-            args = ControllerUtils.getArgs(method, parameters);
+            args = ControllerUtils.getArgs(method, parameters,headers);
         } catch (Exception e) {
             messageResponse.setHttpResponseStatus(HttpResponseStatus.BAD_REQUEST);
             messageResponse.setError("{\"code\":-1,\"message\":\"" + e.getMessage() + "\"}");

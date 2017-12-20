@@ -86,8 +86,7 @@ public class HttpClients {
      * @return
      */
     public static HttpGet httpGet(String url) {
-        HttpGet httpGet = new HttpGet(url);
-        return httpGet;
+        return new HttpGet(url);
     }
 
     /**
@@ -116,8 +115,7 @@ public class HttpClients {
         ub.setPath(url);
         ArrayList<NameValuePair> pairs = covertParams2NVPS(params);
         ub.setParameters(pairs);
-        HttpGet httpGet = new HttpGet(ub.build());
-        return httpGet;
+        return new HttpGet(ub.build());
     }
 
     /**
@@ -302,18 +300,12 @@ public class HttpClients {
      * @return
      */
     public static String browserResult(HttpRequestBase request) {
-        request.setHeader("User-Agent", "Mozilla/5.0");
-        request.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-        request.setHeader("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3");//"en-US,en;q=0.5");
-        request.setHeader("Accept-Charset", "ISO-8859-1,utf-8,gbk,gb2312;q=0.7,*;q=0.7");
-
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
         try {
             response = httpClient.execute(request);
             HttpEntity entity = response.getEntity();
             if (entity != null) {
-                // long len = entity.getContentLength();// -1 表示长度未知
                 String result = EntityUtils.toString(entity);
                 response.close();
                 return result;
@@ -341,15 +333,12 @@ public class HttpClients {
      * @return
      */
     public static String getResult(HttpRequestBase request) {
-        // CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpClient httpClient = getHttpClient();
         CloseableHttpResponse response = null;
         try {
             response = httpClient.execute(request);
-            // response.getStatusLine().getStatusCode();
             HttpEntity entity = response.getEntity();
             if (entity != null) {
-                // long len = entity.getContentLength();// -1 表示长度未知
                 String result = EntityUtils.toString(entity);
                 response.close();
                 //
@@ -382,13 +371,10 @@ public class HttpClients {
         CloseableHttpResponse response = null;
         try {
             response = httpClient.execute(request);
-            // response.getStatusLine().getStatusCode();
             HttpEntity entity = response.getEntity();
             if (entity != null) {
-                // long len = entity.getContentLength();// -1 表示长度未知
                 String result = EntityUtils.toString(entity);
                 response.close();
-                //
                 return result;
             }
         } catch (ClientProtocolException e) {

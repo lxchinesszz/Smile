@@ -30,13 +30,13 @@ public class WebTools {
 
     public static String checkUrl(String oneUrl, String twoUrl) {
         if (StringTools.isNotEmpty(oneUrl)) {
-            //FIXME 避免出现a//b 这样的错误url
+            //避免出现a//b 这样的错误url
             if (oneUrl.endsWith("/") & twoUrl.startsWith("/")) {
                 twoUrl = twoUrl.substring(1, twoUrl.length());
             }
 
         } else if (!twoUrl.startsWith("/")) {
-            //FIXME 给二级url添加前缀/
+            //给二级url添加前缀/
             twoUrl = "/" + twoUrl;
         }
         return twoUrl;

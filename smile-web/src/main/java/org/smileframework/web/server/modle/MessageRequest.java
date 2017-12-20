@@ -13,7 +13,6 @@ import java.util.Map;
  * @author: liuxin
  * @date: 2017/10/9 下午7:41
  */
-@Data
 public class MessageRequest implements Serializable {
     /**
      * 随机分配请求id
@@ -46,7 +45,45 @@ public class MessageRequest implements Serializable {
         this.headers=headers;
     }
 
+    public String getMessageId() {
+        return messageId;
+    }
 
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public RequestMethod getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(RequestMethod methodName) {
+        this.methodName = methodName;
+    }
+
+    public Map getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map parameters) {
+        this.parameters = parameters;
+    }
+
+    public WebDefinition getWebDefinition() {
+        return webDefinition;
+    }
+
+    public void setWebDefinition(WebDefinition webDefinition) {
+        this.webDefinition = webDefinition;
+    }
+
+    public Map<String, Object> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Map<String, Object> headers) {
+        this.headers = headers;
+    }
 }
 
 

@@ -9,7 +9,7 @@ import java.util.*;
  * @date: 2017/12/7 下午6:37
  */
 public class CommandLineArgs {
-    private final Map<String, List<String>> optionArgs = new HashMap();
+    private final Map<String, String> optionArgs = new HashMap();
     private final List<String> nonOptionArgs = new ArrayList();
 
     public CommandLineArgs() {
@@ -17,11 +17,11 @@ public class CommandLineArgs {
 
     public void addOptionArg(String optionName, String optionValue) {
         if (!this.optionArgs.containsKey(optionName)) {
-            this.optionArgs.put(optionName, new ArrayList());
+            this.optionArgs.put(optionName, optionValue);
         }
 
-        if (optionValue != null) {
-            ((List) this.optionArgs.get(optionName)).add(optionValue);
+        if (optionValue == null) {
+            this.optionArgs.put(optionName, "");
         }
 
     }
@@ -34,8 +34,8 @@ public class CommandLineArgs {
         return this.optionArgs.containsKey(optionName);
     }
 
-    public List<String> getOptionValues(String optionName) {
-        return (List) this.optionArgs.get(optionName);
+    public String getOptionValue(String optionName) {
+        return this.optionArgs.get(optionName);
     }
 
     public void addNonOptionArg(String value) {

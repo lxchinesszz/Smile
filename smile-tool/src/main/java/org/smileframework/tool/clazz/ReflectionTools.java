@@ -20,7 +20,7 @@ import java.util.List;
  * @author: liuxin
  * @date: 2017/12/12 下午7:19
  */
-public class ReflectionUtils {
+public class ReflectionTools {
 
 
     public static String[] getParameterNames(Method method) {

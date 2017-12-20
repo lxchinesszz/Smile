@@ -1,4 +1,4 @@
-package org.smileframework.tool.stream;
+package org.smileframework.tool.io;
 
 import org.smileframework.tool.json.JsonUtils;
 

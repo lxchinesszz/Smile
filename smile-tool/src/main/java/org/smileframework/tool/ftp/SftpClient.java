@@ -3,10 +3,8 @@ package org.smileframework.tool.ftp;
 import com.jcraft.jsch.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smileframework.tool.clazz.ClassUtils;
+import org.smileframework.tool.clazz.ClassTools;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +19,13 @@ import java.util.Vector;
  * @date: 2017/12/13 下午12:24
  */
 public class SftpClient {
-    private static final Logger LOG = LoggerFactory.getLogger(ClassUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClassTools.class);
 
 
-    private String userName = "srcb";
-    private String password = "TT87dl67GG4V";
-    private String host = "139.198.1.43";
-    private int port = 22015;
+    private String userName;
+    private String password;
+    private String host;
+    private int port;
     private  Session sshSession = null;
 
     private SftpClient(String userName, String password, String host, Integer port){
@@ -111,10 +109,10 @@ public class SftpClient {
     }
 
     public static void main(String[] args)throws Exception {
-        SftpClient sftpClient=new SftpClient("srcb", "TT87dl67GG4V", "139.198.1.43", 22015);
+        SftpClient sftpClient=new SftpClient("srcb", "TTl67GG4V", "139.198.1.43", 22015);
 //        sftpClient.listFileNames("/share");
-
-        InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("logback.xml");
-        sftpClient.put(resourceAsStream,"/share/test2.text");
+//
+//        InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("logback.xml");
+//        sftpClient.put(resourceAsStream,"/share/test2.text");
     }
 }

@@ -19,10 +19,55 @@ import java.util.jar.JarFile;
  * @author: liuxin
  * @date: 2017/11/17 下午10:55
  */
-public class ClassUtils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClassUtils.class);
+public class ClassTools {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClassTools.class);
 
+    /**
+     * 获取文件包名
+     * @param clazz
+     * @return
+     */
+    public static String classPackageAsResourcePath(Class<?> clazz) {
+        if(clazz == null) {
+            return "";
+        } else {
+            String className = clazz.getName();
+            int packageEndIndex = className.lastIndexOf(46);
+            if(packageEndIndex == -1) {
+                return "";
+            } else {
+                String packageName = className.substring(0, packageEndIndex);
+                return packageName.replace('.', '/');
+            }
+        }
+    }
 
+    /**
+     * 上下文加载器
+     * @return
+     */
+    public static ClassLoader getDefaultClassLoader() {
+        ClassLoader cl = null;
+
+        try {
+            cl = Thread.currentThread().getContextClassLoader();
+        } catch (Throwable var3) {
+            ;
+        }
+
+        if(cl == null) {
+            cl = ClassTools.class.getClassLoader();
+            if(cl == null) {
+                try {
+                    cl = ClassLoader.getSystemClassLoader();
+                } catch (Throwable var2) {
+                    ;
+                }
+            }
+        }
+
+        return cl;
+    }
     /**
      * 获取指定包名下的所有类
      *

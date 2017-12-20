@@ -5,15 +5,17 @@ import org.slf4j.Logger;
 import org.smileframework.ioc.bean.annotation.InsertBean;
 import org.smileframework.ioc.bean.annotation.SmileBean;
 import org.smileframework.ioc.bean.annotation.SmileComponent;
+import org.smileframework.ioc.bean.annotation.SmileService;
 import org.smileframework.ioc.util.Banner;
+import org.smileframework.ioc.util.ConcurrentHashSet;
 import org.smileframework.ioc.util.SmileContextTools;
-import org.smileframework.ioc.util.SmileServerReturn;
-import org.smileframework.tool.clazz.ClassUtils;
+import org.smileframework.tool.clazz.ClassTools;
 import org.smileframework.tool.date.StopWatch;
 import org.smileframework.tool.logmanage.LoggerManager;
+import org.smileframework.tool.properties.PropertiesLoaderTools;
 import org.smileframework.tool.proxy.CGLibProxy;
 import org.smileframework.tool.proxy.SmileProxyAspect;
-
+import org.smileframework.tool.string.StringTools;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -22,7 +24,23 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
+/**
+ * Copyright (c) 2015 The Smile-Boot Project
+ *
+ * Licensed under the Apache License, version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /**
  * @Package: pig.boot.ioc.context
  * @Description: 获取参数
@@ -30,34 +48,46 @@ import java.util.concurrent.atomic.AtomicLong;
  * @date: 2017/11/17 下午11:55
  */
 public class SmileApplicationContext implements ApplicationContext {
-    private static Logger logger = LoggerManager.getLogger(SmileApplicationContext.class);
 
-    private static final Set<ExtApplicationContext> extApplicationContexts = new HashSet<ExtApplicationContext>();
+    private static final Set<ExtApplicationContext> extApplicationContexts = new HashSet<>();
+    /**
+     * 启动时间
+     */
+    private long startTime;
     /**
      * 所有的class文件
      */
-    private static final Set allBeans = new HashSet();
+    private static final Set allBeans = new ConcurrentHashSet();
 
     /**
      * 注册的bean
      */
     private static Map<String, BeanDefinition> registeredBeans = new ConcurrentHashMap<>();
 
+    /**
+     * bean描述类
+     */
     private static ArrayListMultimap<Class<?>, BeanDefinition> interfaceBeanImpl = ArrayListMultimap.create();
     /**
      * 数据接口的文件
+     * 扫描到的接口,因为接口bean不能被实例化,所以单独处理
+     * 然后注入实现类
      */
     private static List<Class<?>> interFaces = new LinkedList<>();
 
     /**
-     * 需要延迟加载的,不需要注入的bean
+     * 需要延迟加载的bean
      */
     private static Map<String, BeanDefinition> delayBeans = new ConcurrentHashMap<>();
 
     /**
-     * 跟重复bean明
+     * 原子分配bean名称,
+     * 如果bean名称已经存在,就替换
      */
     private static final AtomicLong beanIds = new AtomicLong(0L);
+
+
+    private  StopWatch stopWatch ;
 
 
     @Override
@@ -100,8 +130,8 @@ public class SmileApplicationContext implements ApplicationContext {
      * @param args
      * @return
      */
-    private ConfigurableEnvironment prepareEnvironment(String[] args) {
-        return new EnvironmentConverter(args);
+    private ConfigurableEnvironment prepareEnvironment(String[] args,Properties properties) {
+        return new EnvironmentConverter(args,properties);
     }
 
 
@@ -117,60 +147,78 @@ public class SmileApplicationContext implements ApplicationContext {
      */
     @Override
     public ConfigurableApplicationContext scan(String basePackRoot, String[] args) {
-        StopWatch stopWatch = new StopWatch();
+        stopWatch = new StopWatch();
         stopWatch.start();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         /**
          * 处理配置信息
+         * 1. 读取运行后面的添加的参数
+         * 2. 处理配置信息
          */
-        ConfigurableEnvironment configurableEnvironment = this.prepareEnvironment(args);
-        Banner.printBanner(configurableEnvironment.getProperty("server.banner"));
-        Boolean isPrintClass = Boolean.parseBoolean(configurableEnvironment.getProperty("server.classLoad"));
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        //TODO 读取配置信息 创建Properties
+        PropertiesLoaderTools.loadProperties();
+        ConfigurableEnvironment configurableEnvironment = this.prepareEnvironment(args,new Properties());
+        Map<String, String> systemEnvironment = configurableEnvironment.getSystemEnvironment();
+        Banner.printBanner(configurableEnvironment.getProperty("server.banner","D3Banner"));
+        Boolean isPrintClass = Boolean.parseBoolean(systemEnvironment.getOrDefault("server.classLoad","false"));
         Set<Class<?>> classesByPackage = null;
         try {
             /**
              * recursively 是否从根目录,向下查找
              */
-            classesByPackage = ClassUtils.getClassesByPackageName(classLoader, basePackRoot, true, isPrintClass);
+            classesByPackage = ClassTools.getClassesByPackageName(classLoader, basePackRoot, true, isPrintClass);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         /**
-         * 加载到所有的bean
+         * 因为allBean 使用final修饰,引用地址不能改变,所以另外添加:加载到所有的bean
          */
         allBeans.addAll(classesByPackage);
+        /**
+         * 第一次扫描将bean组建,添加到IOC容器
+         */
         classesByPackage.forEach(this::scanComponent);
         /**
-         * 将没有注册的bean检查,然后注入
+         * 第二次扫描将没有注册的bean检查,添加到IOC容器
          */
         processEarlyBeans();
         /**
-         * 合并上线文
+         * 扫描扩展的上下文,并添加到扩展的容器extApplicationContexts 中保存
          */
-        mergeExtContext();
+        scanExtContext();
+
+        ConfigurableApplicationContext configurableApplicationContext = new ConfigurableApplicationContext(registeredBeans, configurableEnvironment, stopWatch);
+        /**
+         * 处理扩展
+         */
+        extApplicationContexts.forEach(mergeExtContext(configurableApplicationContext));
         /**
          * 添加到工具类IE
          */
         SmileContextTools.loadContext(this);
-        /**
-         * 处理扩展
-         */
-        extApplicationContexts.forEach(ext -> {
-            ext.mergeContext(new ConfigurableApplicationContext(registeredBeans, configurableEnvironment, stopWatch));
-        });
-        return new ConfigurableApplicationContext(registeredBeans, configurableEnvironment, stopWatch);
+        return configurableApplicationContext;
     }
 
     /**
      * 加载当前项目中,实现扩展extApplication的对象
      */
-    private void mergeExtContext() {
+    private void scanExtContext() {
         List<BeanDefinition> beanDefinitionImpls = interfaceBeanImpl.get(ExtApplicationContext.class);
         beanDefinitionImpls.stream().forEach(x -> {
             extApplicationContexts.add(((ExtApplicationContext) x.getInstance()));
         });
 
+    }
+
+    /**
+     * 将配置信息与ioc容器传给扩展类->加载扩展的上下文
+     * @param configApplicationContext
+     * @return
+     */
+    private  Consumer<ExtApplicationContext> mergeExtContext(ConfigApplicationContext configApplicationContext){
+        return ext->{
+            ext.mergeContext(configApplicationContext);
+        };
     }
 
     /**
@@ -214,12 +262,14 @@ public class SmileApplicationContext implements ApplicationContext {
      */
     public void scanComponent(Class<?> nextCls) {
         SmileComponent declaredAnnotation = nextCls.getDeclaredAnnotation(SmileComponent.class);
+        SmileService declaredServiceAnnotation= nextCls.getDeclaredAnnotation(SmileService.class);
         Object beanInstance = null;
-        if (declaredAnnotation != null) {
+        if (declaredAnnotation != null||declaredServiceAnnotation!=null) {
             boolean anInterface = nextCls.isInterface();
             //当前扫描的类是一个接口
             if (anInterface) {
                 interFaces.add(nextCls);
+                return;
             }
             try {
                 beanInstance = nextCls.newInstance();
@@ -230,8 +280,11 @@ public class SmileApplicationContext implements ApplicationContext {
                 if (smileProxyAspect != null) {
                     beanInstance = CGLibProxy.instance().setProxyObject(beanInstance).toProxyObject(nextCls);
                 }
-                String beanName = declaredAnnotation.vlaue();
-                if (beanName.isEmpty()) {
+                String beanName ="";
+                if (declaredAnnotation!=null){
+                    beanName=  declaredAnnotation.vlaue();
+                }
+                if (StringTools.isEmpty(beanName)) {
                     beanName = nextCls.getSimpleName();
                 }
                 /**
@@ -423,7 +476,6 @@ public class SmileApplicationContext implements ApplicationContext {
 
     /**
      * search bean by type in certain beans map
-     *
      * @param type
      * @param beansMap
      * @return
@@ -484,16 +536,16 @@ public class SmileApplicationContext implements ApplicationContext {
 
     @Override
     public void setStartupDate(long startupDate) {
-
+    this.startTime=startupDate;
     }
 
     @Override
     public long getStartupDate() {
-        return 0;
+        return startTime;
     }
 
     @Override
     public StopWatch getStopWatch() {
-        return null;
+        return stopWatch;
     }
 }

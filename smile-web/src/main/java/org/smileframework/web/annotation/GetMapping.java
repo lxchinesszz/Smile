@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * @Package: org.smileframework.web.annotation
- * @Description: get请求
+ * @Description: 绑定GET请求
  * @author: liuxin
  * @date: 2017/12/4 下午1:37
  */

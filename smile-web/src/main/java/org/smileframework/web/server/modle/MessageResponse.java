@@ -11,7 +11,6 @@ import java.io.Serializable;
  * @author: liuxin
  * @date: 2017/10/9 下午7:42
  */
-@Data
 public class MessageResponse implements Serializable {
     /**
      * 响应id=请求id
@@ -51,5 +50,46 @@ public class MessageResponse implements Serializable {
                 ", error='" + error + '\'' +
                 ", result=" + result +
                 '}';
+    }
+
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public HttpResponseStatus getHttpResponseStatus() {
+        return httpResponseStatus;
+    }
+
+    public void setHttpResponseStatus(HttpResponseStatus httpResponseStatus) {
+        this.httpResponseStatus = httpResponseStatus;
     }
 }

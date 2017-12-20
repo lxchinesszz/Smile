@@ -21,9 +21,9 @@ public class FtpClientUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(FtpClientUtils.class);
 
-    private String userName = "srcb";
-    private String password = "TT87dl67GG4V";
-    private String ip = "139.198.1.43";
+    private String userName;
+    private String password;
+    private String ip;
     private int port = 22015;
     private Properties property = null;    //属性集
     private FTPSClient ftpClient = null; //FTP 客户端代理

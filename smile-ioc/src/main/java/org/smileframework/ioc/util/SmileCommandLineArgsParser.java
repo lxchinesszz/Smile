@@ -57,7 +57,7 @@ public class SmileCommandLineArgsParser {
         String x2 = "--server.rpc=false";
         CommandLineArgs parse = new SmileCommandLineArgsParser().parse(x, x1, x2);
         System.out.println(parse);
-        System.out.println(parse.getOptionValues("server.rpc"));
+        System.out.println(parse.getOptionValue("server.rpc"));
 
         parse.getNonOptionArgs().stream().map(str -> {
             return str.toUpperCase();

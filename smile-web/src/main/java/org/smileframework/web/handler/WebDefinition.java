@@ -1,9 +1,11 @@
 package org.smileframework.web.handler;
 
 import lombok.Data;
+import org.smileframework.tool.clazz.ReflectionTools;
 import org.smileframework.web.annotation.RequestMethod;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * @Package: org.smileframework.web.handler
@@ -42,10 +44,14 @@ public class WebDefinition {
     private Method method;
 
     /**
-     * //FIXME 处于提高效率,不在编译器解释
+     * 处于提高效率,不在编译器解释
      * 在使用的时候在建议
      */
     private String[] parameterNames;
+    /**
+     * 参数信息,所以名称及注解
+     */
+    List<ReflectionTools.ParamDefinition> paramDefinitions;
 
     public WebDefinition(){}
 
@@ -57,5 +63,6 @@ public class WebDefinition {
         this.controller = controller;
         this.method = method;
         this.parameterNames=parameterNames;
+        paramDefinitions=ReflectionTools.getParameterDefinitions(method);
     }
 }

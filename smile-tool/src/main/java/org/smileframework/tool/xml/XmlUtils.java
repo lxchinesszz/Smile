@@ -22,10 +22,10 @@ public class XmlUtils {
      * @return
      */
     public static String mapToXML(Map map) {
-        logger.debug("将Map转成Xml, Map：" + map.toString());
+        logger.debug("将Map转成Xml, Map:{}", map.toString());
         StringBuffer sb = new StringBuffer();
         mapToXMLParse(map, sb);
-        logger.debug("将Map转成Xml, Xml：" + sb.toString());
+        logger.debug("将Map转成Xml, Xml:{}" , sb.toString());
         try {
             return sb.toString();
         } catch (Exception e) {
@@ -76,20 +76,5 @@ public class XmlUtils {
         return XML.toJSONObject(xml).toMap();
     }
 
-//    public static void main(String[] args) throws Exception {
-//        Map<String, Object> dataMap = new LinkedHashMap<String, Object>(); //默认
-//        dataMap.put("rtnCode", "02");
-//        dataMap.put("rtnMsg", "查询失败");
-//        dataMap.put("idWltCloudDistrict", "专区id");
-//        Map<String, Object> bizMap = new LinkedHashMap<String, Object>();
-//        bizMap.put("serviceId", "serviceId001");
-//        dataMap.put("prodKindList", bizMap);
-//        String s = mapToXML(dataMap);
-//        System.out.println(s);
-//        JSONObject jsonObject = XML.toJSONObject(s);
-//        String s1 = jsonObject.toString(4);
-//        System.out.println(s1);
-//
-//    }
 
 }

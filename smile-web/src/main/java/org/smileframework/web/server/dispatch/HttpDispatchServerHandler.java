@@ -93,11 +93,14 @@ public class HttpDispatchServerHandler extends SimpleChannelInboundHandler<HttpO
             Map<String, Object> requestParams = new ConcurrentHashMap<>();
             // 处理get请求
             if (methodName.equalsIgnoreCase("GET")) {
-                String queryContent = dispatchUrl.substring(dispatchUrl.indexOf("?") + 1);
-                Map<String, Object> queryParameterFromContent = URLTools.getQueryParameterFromContent(queryContent);
-                queryParameterFromContent.entrySet().forEach(entry -> {
-                    requestParams.put(entry.getKey(), entry.getValue());
-                });
+                boolean contains = dispatchUrl.contains("?");
+                if (contains){
+                    String queryContent = dispatchUrl.substring(dispatchUrl.indexOf("?") + 1);
+                    Map<String, Object> queryParameterFromContent = URLTools.getQueryParameterFromContent(queryContent);
+                    queryParameterFromContent.entrySet().forEach(entry -> {
+                        requestParams.put(entry.getKey(), entry.getValue());
+                    });
+                }
             }
             // 处理POST请求
             if (methodName.equalsIgnoreCase("POST")) {
@@ -134,9 +137,11 @@ public class HttpDispatchServerHandler extends SimpleChannelInboundHandler<HttpO
                 return;
             }
             String consumes = webDefinition.getConsumes();
-            if (!contentType.equalsIgnoreCase(consumes)&StringTools.isNotEmpty(consumes)){
-                NettyResponse.writeResponse(ctx.channel(), "Bad Request (The content-type don't match)", HttpResponseStatus.BAD_REQUEST);
-                return;
+            if (StringTools.isNotEmpty(contentType)){
+                if (StringTools.isNotEmpty(consumes)&(!contentType.equalsIgnoreCase(consumes))){
+                    NettyResponse.writeResponse(ctx.channel(), "Bad Request (The content-type don't match)", HttpResponseStatus.BAD_REQUEST);
+                    return;
+                }
             }
             /**
              * //TODO 异步处理url获取处理的 bean

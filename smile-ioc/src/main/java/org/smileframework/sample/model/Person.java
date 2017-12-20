@@ -2,7 +2,7 @@ package org.smileframework.sample.model;
 
 /**
  * @Package: org.smileframework.sample.model
- * @Description: ${todo}
+ * @Description:
  * @author: liuxin
  * @date: 2017/12/6 下午3:23
  */

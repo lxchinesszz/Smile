@@ -1,8 +1,10 @@
 package org.smileframework.tool.http;
 
 import com.google.common.base.Splitter;
+import org.slf4j.Logger;
 import org.smileframework.tool.common.Default;
 import org.smileframework.tool.json.JsonUtils;
+import org.smileframework.tool.logmanage.LoggerManager;
 import org.smileframework.tool.string.StringTools;
 
 import java.net.MalformedURLException;
@@ -18,12 +20,13 @@ import java.util.regex.Pattern;
  * @date: 2017/12/8 下午11:24
  */
 public class URLTools {
+    private static final Logger logger = LoggerManager.getLogger(URLTools.class);
+    private static Pattern pattern = Pattern
+            .compile("^([hH][tT]{2}[pP]://|[hH][tT]{2}[pP][sS]://)(([A-Za-z0-9-~]+).)+([A-Za-z0-9-~\\/&=])+$");
+
 
     public static Boolean isUrl(String urlStr) {
-        Pattern pattern = Pattern
-                .compile("^([hH][tT]{2}[pP]://|[hH][tT]{2}[pP][sS]://)(([A-Za-z0-9-~]+).)+([A-Za-z0-9-~\\/&=])+$");
         return pattern.matcher(urlStr).find();
-
     }
 
     public static URL url(String urlStr) {
@@ -31,7 +34,7 @@ public class URLTools {
         try {
             url = new URL(urlStr);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            logger.info(e.getMessage());
         }
         return url;
     }
@@ -88,11 +91,11 @@ public class URLTools {
         String query = getQuery(urlStr);
         Iterable<String> split = Splitter.on("&").split(query);
         split.forEach(queryParam -> {
-            if (StringTools.isEmpty(queryParam)){
+            if (StringTools.isEmpty(queryParam)) {
                 return;
             }
             String[] params = queryParam.split("=");
-            params[1] = Default.defaultValue(params[1], "",String.class);
+            params[1] = Default.defaultValue(params[1], "", String.class);
             queryParameter.put(params[0], params[1]);
         });
         return queryParameter;
@@ -102,17 +105,15 @@ public class URLTools {
         Map<String, Object> queryParameter = new LinkedHashMap<>();
         Iterable<String> split = Splitter.on("&").split(queryContent);
         split.forEach(queryParam -> {
-            if (StringTools.isEmpty(queryParam)){
+            if (StringTools.isEmpty(queryParam)) {
                 return;
             }
             String[] params = queryParam.split("=");
-            params[1] = Default.defaultValue(params[1], "",String.class);
+            params[1] = Default.defaultValue(params[1], "", String.class);
             queryParameter.put(params[0], params[1]);
         });
         return queryParameter;
     }
-
-
 
 
     public static void main(String[] args) {
@@ -121,7 +122,6 @@ public class URLTools {
         System.out.println(getAuthority("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&sd=23"));//blog.csdn.net:3201
         System.out.println(getPath("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&sd=23"));///yongh701/article/details/46894417
         System.out.println(JsonUtils.toJson(getQueryParameter("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&")));
-
         System.out.println(getPath("/smile/get?orderId=2334"));
     }
 

@@ -10,7 +10,7 @@ package org.smileframework.ioc.util;
 public class BeanStudy {
     public static void main(String[] args) {
 
-        //FIXME======================接口层定义======================
+        //======================接口层定义======================
         /**
          * Spring Bean的创建是典型的工厂模式，这一系列的Bean工厂，
          * 也即IOC容器为开发者管理对象间的依赖关系提供了很多便利和基础服务
@@ -38,10 +38,10 @@ public class BeanStudy {
          *接口定义 Bean 的自动装配规则
          */
         //AutowireCapableBeanFactory AutowireCapableBeanFactory;
-        //FIXME======================接口层定义======================
+        //======================接口层定义======================
 
 
-        //FIXME======================IOC实现层======================
+        //======================IOC实现层======================
         /**
          * XmlBeanFactory就是针对最基本的ioc容器的实现
          * 这个IOC容器可以读取XML文件定义的BeanDefinition（XML文件中对bean的描述）
@@ -57,10 +57,10 @@ public class BeanStudy {
          */
         //ApplicationContext applicationContext;
 
-        //FIXME======================IOC实现层======================
+        //======================IOC实现层======================
 
 
-        //FIXME======================IOC基础======================
+        //======================IOC基础======================
         /**
          * Bean对象在Spring实现中是以BeanDefinition来描述的，其继承体系如下：
          * Bean 的解析过程非常复杂，功能被分的很细，因为这里需要被扩展的地方很多，

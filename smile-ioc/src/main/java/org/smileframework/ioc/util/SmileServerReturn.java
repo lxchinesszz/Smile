@@ -15,6 +15,7 @@ public class SmileServerReturn {
                 }
             }
         });
+        thread.setPriority(Thread.MIN_PRIORITY);
         thread.start();
     }
 }

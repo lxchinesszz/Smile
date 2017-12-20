@@ -24,6 +24,7 @@ public class CGLibProxy implements MethodInterceptor {
     /**
      * 预处理
      * 当代理逻辑中依赖其他类,需要提前注入时候,仅扩展此类
+     *
      * 扩展逻辑类 proxyAspect 从ioc容器中获取实例
      *
      * @return
@@ -43,6 +44,7 @@ public class CGLibProxy implements MethodInterceptor {
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
         Object result = null;
+        //判断方法是否使用代理
         boolean contains = preProcessing().contains(method.getName());
         if (contains) {
             proxyAspect.around();
@@ -113,6 +115,11 @@ public class CGLibProxy implements MethodInterceptor {
      * @param args
      */
     public static void main(String[] args) {
+
+        /******************************************
+         * 方法级代理
+         */
+
         /**
          * 实现前置通知和后置通知
          */
@@ -128,6 +135,12 @@ public class CGLibProxy implements MethodInterceptor {
         System.out.println(proxy);
         proxy.dance("芭蕾舞");
 
+
+
+        /******************************************
+         * 实例代理
+         */
+
         /**
          * 拦截对象
          */
@@ -136,9 +149,14 @@ public class CGLibProxy implements MethodInterceptor {
 
 
         Jay2 jay3 = CGLibProxy.instance().setProxyObject(new Jay2("周杰伦")).getProxy(Jay2.class);
+
+
         jay3.say();
         System.out.println(Jay2.class.isAssignableFrom(jay3.getClass()));
         System.out.println(jay3);
+
+
+        Object jay4= CGLibProxy.instance().setProxyObject(new Jay2("周杰伦")).toProxyObject(Jay2.class);
 
     }
 
