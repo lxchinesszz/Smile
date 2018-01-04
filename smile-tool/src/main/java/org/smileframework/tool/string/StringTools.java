@@ -27,6 +27,26 @@ public final class StringTools {
     private static String ISNUMBER = "[0-9]*";
 
 
+
+    public static boolean hasText(CharSequence str) {
+        if(!hasLength(str)) {
+            return false;
+        } else {
+            int strLen = str.length();
+
+            for(int i = 0; i < strLen; ++i) {
+                if(!Character.isWhitespace(str.charAt(i))) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    public static boolean hasText(String str) {
+        return hasText((CharSequence)str);
+    }
     public static String simpleClassName(Class cls) {
         return cls.getSimpleName();
     }
@@ -761,6 +781,29 @@ public final class StringTools {
         return matcher.matches();
     }
 
+    public static String arrayToDelimitedString(Object[] arr, String delim) {
+        if(ObjectTools.isEmpty(arr)) {
+            return "";
+        } else if(arr.length == 1) {
+            return ObjectTools.nullSafeToString(arr[0]);
+        } else {
+            StringBuilder sb = new StringBuilder();
+
+            for(int i = 0; i < arr.length; ++i) {
+                if(i > 0) {
+                    sb.append(delim);
+                }
+
+                sb.append(arr[i]);
+            }
+
+            return sb.toString();
+        }
+    }
+
+    public static String arrayToCommaDelimitedString(Object[] arr) {
+        return arrayToDelimitedString(arr, ",");
+    }
 
 
     public static void main(String[] args) throws Exception{

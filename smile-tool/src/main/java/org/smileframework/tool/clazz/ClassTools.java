@@ -2,14 +2,15 @@ package org.smileframework.tool.clazz;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smileframework.tool.asserts.Assert;
+import org.smileframework.tool.string.ObjectTools;
 import org.smileframework.tool.string.StringTools;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -19,21 +20,138 @@ import java.util.jar.JarFile;
  * @author: liuxin
  * @date: 2017/11/17 下午10:55
  */
-public class ClassTools {
+public abstract class ClassTools {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassTools.class);
+
+
+    /**
+     * 获取原始类型,主要处理从被代理的对象中,获取原始参数
+     * @param instance
+     * @return
+     */
+    public static Class<?> getUserClass(Object instance) {
+        Assert.notNull(instance, "Instance must not be null");
+        return getUserClass(instance.getClass());
+    }
+
+    public static Class<?> getUserClass(Class<?> clazz) {
+        if(clazz != null && clazz.getName().contains("$$")) {
+            Class<?> superclass = clazz.getSuperclass();
+            if(superclass != null && Object.class != superclass) {
+                return superclass;
+            }
+        }
+
+        return clazz;
+    }
+
+    /**
+     * 将 objs,装换targetClass类型的List
+     * @param objs
+     * @param targetClass
+     * @param <T>
+     * @return
+     */
+    public static <T> List<T> cast(Object[] objs, Class<T> targetClass) {
+        List<T> methods = new ArrayList<T>();
+        Iterator<Object> iterator = Arrays.asList(objs).iterator();
+        while (iterator.hasNext()) {
+            methods.add(targetClass.cast(iterator.next()));
+        }
+        return methods;
+    }
+
+    public static <T> List<T> castByArray(Object[] objs, Class<T> targetClass) {
+        List<T> methods = new ArrayList<T>();
+        Iterator<Object> iterator = Arrays.asList(objs).iterator();
+        while (iterator.hasNext()) {
+            methods.add(targetClass.cast(iterator.next()));
+        }
+        return methods;
+    }
+
+    /**
+     * ClassUtils.getShortName() //获取短类名，如上例中的：Required
+     * ClassUtils.getClassFileName() //获取类文件名，如上例中的：Required.class
+     * ClassUtils.getPackageName() //获取包，如上例中的：cps.apm.util.fileprocessor.annotation
+     * ClassUtils.getQualifiedName() //获取包名+类名，如上例中的：cps.apm.util.fileprocessor.annotation.Required
+     * Assert
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getShortName(Class<?> clazz) {
+        if (ObjectTools.isNotEmpty(clazz)) {
+            return clazz.getSimpleName();
+        }
+        return null;
+    }
+
+    /**
+     * 获取类文件名，如上例中的：Required.class
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getClassFileName(Class<?> clazz) {
+        if (ObjectTools.isNotEmpty(clazz)) {
+            String className = clazz.getName();
+            int lastDotIndex = className.lastIndexOf(46);
+            return className.substring(lastDotIndex + 1) + ".class";
+        }
+        return null;
+    }
+
+    /**
+     * 获取包，如上例中的：org.smileframework.tool.asserts
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getPackageName(Class<?> clazz) {
+        if (ObjectTools.isNotEmpty(clazz)) {
+            String fqClassName = clazz.getName();
+            int lastDotIndex = fqClassName.lastIndexOf(46);
+            return lastDotIndex != -1 ? fqClassName.substring(0, lastDotIndex) : "";
+        }
+        return null;
+    }
+
+    /**
+     * org.smileframework.tool.asserts.Assert
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getQualifiedName(Class<?> clazz) {
+        return clazz.isArray() ? getQualifiedNameForArray(clazz) : clazz.getName();
+    }
+
+    private static String getQualifiedNameForArray(Class<?> clazz) {
+        StringBuilder result = new StringBuilder();
+
+        while (clazz.isArray()) {
+            clazz = clazz.getComponentType();
+            result.append("[]");
+        }
+
+        result.insert(0, clazz.getName());
+        return result.toString();
+    }
 
     /**
      * 获取文件包名
+     *
      * @param clazz
      * @return
      */
     public static String classPackageAsResourcePath(Class<?> clazz) {
-        if(clazz == null) {
+        if (clazz == null) {
             return "";
         } else {
             String className = clazz.getName();
             int packageEndIndex = className.lastIndexOf(46);
-            if(packageEndIndex == -1) {
+            if (packageEndIndex == -1) {
                 return "";
             } else {
                 String packageName = className.substring(0, packageEndIndex);
@@ -44,6 +162,7 @@ public class ClassTools {
 
     /**
      * 上下文加载器
+     *
      * @return
      */
     public static ClassLoader getDefaultClassLoader() {
@@ -55,9 +174,9 @@ public class ClassTools {
             ;
         }
 
-        if(cl == null) {
+        if (cl == null) {
             cl = ClassTools.class.getClassLoader();
-            if(cl == null) {
+            if (cl == null) {
                 try {
                     cl = ClassLoader.getSystemClassLoader();
                 } catch (Throwable var2) {
@@ -68,13 +187,14 @@ public class ClassTools {
 
         return cl;
     }
+
     /**
      * 获取指定包名下的所有类
      *
      * @param packageName
      * @return
      */
-    public static Set<Class<?>> getClassesByPackageName(ClassLoader classLoader, String packageName, boolean recursively,boolean isPrintCLass) throws IOException {
+    public static Set<Class<?>> getClassesByPackageName(ClassLoader classLoader, String packageName, boolean recursively, boolean isPrintCLass) throws IOException {
         Set<Class<?>> classes = new HashSet<>();
         try {
             Enumeration<URL> urls = classLoader.getResources(packageName.replace(".", "/"));
@@ -84,9 +204,9 @@ public class ClassTools {
                     String protocol = url.getProtocol();
                     if ("file".equals(protocol)) {
                         String packagePath = url.getPath().replaceAll(" ", "");
-                        getClassesInPackageUsingFileProtocol(classes, classLoader, packagePath, packageName, recursively,isPrintCLass);
+                        getClassesInPackageUsingFileProtocol(classes, classLoader, packagePath, packageName, recursively, isPrintCLass);
                     } else if ("jar".equals(protocol)) {
-                        getClassesInPackageUsingJarProtocol(classes, classLoader, url, packageName, recursively,isPrintCLass);
+                        getClassesInPackageUsingJarProtocol(classes, classLoader, url, packageName, recursively, isPrintCLass);
                     } else {
                         LOGGER.info(String.format("protocol[%s] not supported!", protocol));
                     }
@@ -98,9 +218,9 @@ public class ClassTools {
         return classes;
     }
 
-    private static void getClassesInPackageUsingJarProtocol(Set<Class<?>> classes, ClassLoader classLoader, URL url, String packageName, boolean recursively,boolean isPrintCLass) throws IOException {
+    private static void getClassesInPackageUsingJarProtocol(Set<Class<?>> classes, ClassLoader classLoader, URL url, String packageName, boolean recursively, boolean isPrintCLass) throws IOException {
         String packagePath = packageName.replace(".", "/");
-        if (isPrintCLass){
+        if (isPrintCLass) {
             LOGGER.info("---------getClassesInPackageUsingJarProtocol----------");
         }
         JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
@@ -114,22 +234,21 @@ public class ClassTools {
                     if (!recursively && jarEntryName.substring(packagePath.length() + 1).contains("/")) {
                         continue;
                     }
-                    if (isPrintCLass){
+                    if (isPrintCLass) {
                         LOGGER.info(jarEntryName);
-//                        System.out.println("print:"+jarEntryName);
                     }
                     String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replaceAll("/", ".");
                     classes.add(loadClass(className, false, classLoader));
                 }
             }
         }
-        if (isPrintCLass){
+        if (isPrintCLass) {
             LOGGER.info("---------getClassesInPackageUsingJarProtocol----------");
         }
     }
 
 
-    private static void getClassesInPackageUsingFileProtocol(Set<Class<?>> classes, ClassLoader classLoader, String packagePath, String packageName, boolean recursively,boolean isPrintCLass) {
+    private static void getClassesInPackageUsingFileProtocol(Set<Class<?>> classes, ClassLoader classLoader, String packagePath, String packageName, boolean recursively, boolean isPrintCLass) {
         final File[] files = new File(packagePath).listFiles(
                 file ->
                         (file.isFile() && file.getName().endsWith(".class") || file.isDirectory()));
@@ -150,7 +269,7 @@ public class ClassTools {
                 if (!StringTools.isEmpty(packageName)) {
                     subPackageName = packageName + "." + subPackageName;
                 }
-                getClassesInPackageUsingFileProtocol(classes, classLoader, subPackagePath, subPackageName, recursively,isPrintCLass);
+                getClassesInPackageUsingFileProtocol(classes, classLoader, subPackagePath, subPackageName, recursively, isPrintCLass);
             }
         }
     }
@@ -173,4 +292,5 @@ public class ClassTools {
         }
         return clazz;
     }
+
 }

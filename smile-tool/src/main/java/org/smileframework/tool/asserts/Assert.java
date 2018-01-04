@@ -6,6 +6,8 @@
  */
 package org.smileframework.tool.asserts;
 
+import org.smileframework.tool.string.StringTools;
+
 import java.util.Collection;
 import java.util.Map;
 
@@ -24,6 +26,17 @@ import java.util.Map;
  */
 public abstract class Assert {
 
+    public static void hasText(String text, String message) {
+        if(!StringTools.hasText(text)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /** @deprecated */
+    @Deprecated
+    public static void hasText(String text) {
+        hasText(text, "[Assertion failed] - this String argument must have text; it must not be null, empty, or blank");
+    }
     /**
      * 判断输入对象是否为null，如果不为null抛出<code>IllegalArgumentException</code>异常
      *

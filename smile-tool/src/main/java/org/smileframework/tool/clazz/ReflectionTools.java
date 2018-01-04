@@ -4,7 +4,7 @@ import javassist.*;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
-import org.smileframework.tool.json.JsonUtils;
+import org.smileframework.tool.string.StringTools;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -12,6 +12,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -21,6 +22,24 @@ import java.util.List;
  * @date: 2017/12/12 下午7:19
  */
 public class ReflectionTools {
+
+
+    public static List<Method> getMethod(Object obj) {
+        return Arrays.asList(obj.getClass().getMethods());
+    }
+
+
+    public static List<Method> getMethod(Object obj, String methodName) {
+        Object[] objects = getMethod(obj).stream().filter(m -> {
+            if (StringTools.isNotEmpty(methodName)) {
+                return m.getName().contains(methodName);
+            } else {
+                return true;
+            }
+        }).toArray();
+        return ClassTools.castByArray(objects, Method.class);
+    }
+
 
 
     public static String[] getParameterNames(Method method) {
@@ -123,6 +142,7 @@ public class ReflectionTools {
         }
         return null;
     }
+
     public static void main(String[] args) throws Exception {
         Demo demo = new Demo();
         Method[] methods = demo.getClass().getMethods();

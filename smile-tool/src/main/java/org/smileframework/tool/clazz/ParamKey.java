@@ -16,7 +16,9 @@ import static java.lang.annotation.ElementType.PARAMETER;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(PARAMETER)
 public @interface ParamKey {
-    String value();
+    String value() default "";
 
     String name() default "";
+
+    boolean is();
 }

@@ -9,7 +9,22 @@ import org.smileframework.tool.json.JsonUtils;
  * @date: 2017/12/12 下午10:44
  */
 public class CastConvert {
+
+
+
+
     public static Object cast(Class cls, String value) {
+        return cast(cls, value, false);
+    }
+
+    /**
+     * 强制转换,默认转换为Json
+     *
+     * @param cls
+     * @param value
+     * @return
+     */
+    public static Object cast(Class cls, String value, boolean isJson) {
         int targetHashCode = cls.hashCode();
         if (targetHashCode == int.class.hashCode()) {
             return Integer.parseInt(value);
@@ -22,12 +37,14 @@ public class CastConvert {
         } else if (targetHashCode == Long.class.hashCode()) {
             return Long.parseLong(value);
         }
-        return JsonUtils.fromJsonByJackson(value, cls);
+        if (isJson) {
+            return JsonUtils.fromJsonByJackson(value, cls);
+        }
+        return value;
     }
 
+
     public static void main(String[] args) {
-        Object cast = cast(int.class, "23");
-        System.out.println(cast);
-        System.out.println(cast(Double.class,"23"));
+
     }
 }

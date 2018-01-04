@@ -3,6 +3,7 @@ package org.smileframework.tool.json;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Predicates;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.json.JSONException;
@@ -11,6 +12,7 @@ import org.smileframework.tool.demo.Person;
 import org.smileframework.tool.exeception.JsonConverException;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -127,12 +129,23 @@ public class JsonUtils {
 
     public static void main(String[] args)throws Exception {
         Person person = new Person("xiaomi");
-        System.out.println(toJson(person));//{"name":"xiaomi","age":0}
-        System.out.println(toJsonByJackson(person));//{"age":0}
+//        System.out.println(toJson(person));//{"name":"xiaomi","age":0}
+//        System.out.println(toJsonByJackson(person));//{"age":0}
+//
+//        System.out.println(toJson(person));
+//        System.out.println(toJson(fromJsonByJackson(toJson(person), Person.class)));
+//        System.out.println(toJson(fromJson(toJson(person), Person.class)));
 
-        System.out.println(toJson(person));
-        System.out.println(toJson(fromJsonByJackson(toJson(person), Person.class)));
-        System.out.println(toJson(fromJson(toJson(person), Person.class)));
+        String json="{\"code\":\"123456789.00\"}";
+        Map map = fromJsonByJackson(json, Map.class);
+        System.out.println(map.get("code"));
+
+        BigDecimal bigDecimal=new BigDecimal("123456789.00");
+        System.out.println(bigDecimal.toBigInteger());//123456789
+
+        double v = Double.parseDouble("1.234567892E8");
+        Long v1 = (long) v;
+        System.out.println(String.valueOf(v1));//123456789
 
     }
 }
