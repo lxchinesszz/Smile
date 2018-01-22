@@ -12,7 +12,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -25,10 +24,16 @@ public class ReflectionTools {
 
 
     public static List<Method> getMethod(Object obj) {
-        return Arrays.asList(obj.getClass().getMethods());
+        return Arrays.asList(obj.getClass().getDeclaredMethods());
     }
 
 
+    /**
+     * 获取指定对象的方法
+     * @param obj
+     * @param methodName
+     * @return
+     */
     public static List<Method> getMethod(Object obj, String methodName) {
         Object[] objects = getMethod(obj).stream().filter(m -> {
             if (StringTools.isNotEmpty(methodName)) {
@@ -41,7 +46,11 @@ public class ReflectionTools {
     }
 
 
-
+    /**
+     * 根据方法,获取参数名称
+     * @param method
+     * @return
+     */
     public static String[] getParameterNames(Method method) {
         //declar不局限与修饰符
         Class clazz = method.getDeclaringClass();

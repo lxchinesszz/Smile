@@ -2,7 +2,7 @@ package org.smileframework.tool.annotation;
 
 /**
  * @Package: org.smileframework.tool.annotation
- * @Description: ${todo}
+ * @Description:
  * @author: liuxin
  * @date: 2018/1/3 上午11:56
  */

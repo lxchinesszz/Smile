@@ -4,6 +4,7 @@ import org.smileframework.tool.clazz.ClassTools;
 import org.smileframework.tool.clazz.Demo;
 import org.smileframework.tool.clazz.ReflectionTools;
 import org.smileframework.tool.string.ObjectTools;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -21,13 +22,14 @@ public class AnnotationTools {
     public static List<Annotation> getAnnotationFromMethod(Method method) {
         return Arrays.asList(method.getAnnotations());
     }
+
     /**
      * 获取注解对象参数值
      *
      * @param annotation
      * @return
      */
-    public static Map<String, Object> getAnnotationAttributeAsMap(Annotation annotation) {
+    public static AnnotationMap<String, Object> getAnnotationAttributeAsMap(Annotation annotation) {
         List<AnnotationAttributes> annotationAttributes = getAnnotationAttributes(annotation.annotationType());
         Map<String, Object> annotationValue = new ConcurrentHashMap<>();
         for (AnnotationAttributes annotationAttr : annotationAttributes) {
@@ -42,7 +44,7 @@ public class AnnotationTools {
             annotationValue.put(annotationKey, o);
         }
 
-        return annotationValue;
+        return new AnnotationMap<>(annotationValue);
     }
 
 
@@ -77,13 +79,19 @@ public class AnnotationTools {
         return ClassTools.castByArray(declaredMethods, Method.class);
     }
 
+
     public static void main(String[] args) throws Exception {
         List<Method> add = ReflectionTools.getMethod(new Demo(), "add");
         Method method = add.get(0);
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         Annotation annotation = parameterAnnotations[0][0];
-        Map<String, Object> annotationAttributes = getAnnotationAttributeAsMap(annotation);
-        annotationAttributes.entrySet().forEach(name-> System.out.println(name.getKey()+"--"+name.getValue()));
+        Map<String, Object> annotationAttributes = AnnotationTools.getAnnotationAttributeAsMap(annotation);
+        annotationAttributes.entrySet().forEach(name -> System.out.println(name.getKey() + "--" + name.getValue()));
+
+        String name = AnnotationTools.getAnnotationAttributeAsMap(annotation).getString("name");
+        System.out.println(name);
+
+
     }
 
 }

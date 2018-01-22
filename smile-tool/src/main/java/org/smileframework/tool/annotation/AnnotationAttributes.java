@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 /**
  * @Package: org.smileframework.tool.annotation
- * @Description: ${todo}
+ * @Description: 注解的属性
  * @author: liuxin
  * @date: 2018/1/4 下午3:29
  */
