@@ -20,8 +20,8 @@ import java.util.jar.JarFile;
  * @author: liuxin
  * @date: 2017/11/17 下午10:55
  */
-public abstract class ClassTools {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClassTools.class);
+public abstract class ClassLoadTools {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClassLoadTools.class);
 
 
     /**
@@ -174,7 +174,7 @@ public abstract class ClassTools {
         }
 
         if (cl == null) {
-            cl = ClassTools.class.getClassLoader();
+            cl = ClassLoadTools.class.getClassLoader();
             if (cl == null) {
                 try {
                     cl = ClassLoader.getSystemClassLoader();
@@ -189,9 +189,12 @@ public abstract class ClassTools {
 
     /**
      * 获取指定包名下的所有类
-     *
-     * @param packageName
+     * @param classLoader 指定类加载器
+     * @param packageName 包名
+     * @param recursively 是否地柜查询
+     * @param isPrintCLass 是否打印获取日志
      * @return
+     * @throws IOException
      */
     public static Set<Class<?>> getClassesByPackageName(ClassLoader classLoader, String packageName, boolean recursively, boolean isPrintCLass) throws IOException {
         Set<Class<?>> classes = new HashSet<>();
@@ -248,6 +251,9 @@ public abstract class ClassTools {
 
 
     private static void getClassesInPackageUsingFileProtocol(Set<Class<?>> classes, ClassLoader classLoader, String packagePath, String packageName, boolean recursively, boolean isPrintCLass) {
+        if (isPrintCLass) {
+            LOGGER.info("---------getClassesInPackageUsingFileProtocol----------");
+        }
         final File[] files = new File(packagePath).listFiles(
                 file ->
                         (file.isFile() && file.getName().endsWith(".class") || file.isDirectory()));
@@ -257,6 +263,9 @@ public abstract class ClassTools {
                 String className = fileName.substring(0, fileName.lastIndexOf("."));
                 if (!StringTools.isEmpty(packageName)) {
                     className = packageName + "." + className;
+                }
+                if (isPrintCLass) {
+                    LOGGER.info(className);
                 }
                 classes.add(loadClass(className, false, classLoader));
             } else if (recursively) {
@@ -268,8 +277,14 @@ public abstract class ClassTools {
                 if (!StringTools.isEmpty(packageName)) {
                     subPackageName = packageName + "." + subPackageName;
                 }
+                if (isPrintCLass) {
+                    LOGGER.info(subPackageName);
+                }
                 getClassesInPackageUsingFileProtocol(classes, classLoader, subPackagePath, subPackageName, recursively, isPrintCLass);
             }
+        }
+        if (isPrintCLass) {
+            LOGGER.info("---------getClassesInPackageUsingFileProtocol----------");
         }
     }
 
@@ -290,6 +305,11 @@ public abstract class ClassTools {
             throw new RuntimeException(e);
         }
         return clazz;
+    }
+
+    public static void main(String[] args) throws Exception{
+//        System.out.println(classPackageAsResourcePath(String.class));
+//        getClassesByPackageName(Thread.currentThread().getContextClassLoader(),"org.smileframework" ,true,true);
     }
 
 }
