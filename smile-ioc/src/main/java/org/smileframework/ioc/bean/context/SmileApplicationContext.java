@@ -16,6 +16,7 @@ import org.smileframework.tool.properties.PropertiesLoaderTools;
 import org.smileframework.tool.proxy.CGLibProxy;
 import org.smileframework.tool.proxy.SmileProxyAspect;
 import org.smileframework.tool.string.StringTools;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -28,19 +29,20 @@ import java.util.function.Consumer;
 
 /**
  * Copyright (c) 2015 The Smile-Boot Project
- *
+ * <p>
  * Licensed under the Apache License, version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at:
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * @Package: pig.boot.ioc.context
  * @Description: 获取参数
@@ -87,7 +89,7 @@ public class SmileApplicationContext implements ApplicationContext {
     private static final AtomicLong beanIds = new AtomicLong(0L);
 
 
-    private  StopWatch stopWatch ;
+    private StopWatch stopWatch;
 
 
     @Override
@@ -130,8 +132,8 @@ public class SmileApplicationContext implements ApplicationContext {
      * @param args
      * @return
      */
-    private ConfigurableEnvironment prepareEnvironment(String[] args,Properties properties) {
-        return new EnvironmentConverter(args,properties);
+    private ConfigurableEnvironment prepareEnvironment(String[] args, Properties properties) {
+        return new EnvironmentConverter(args, properties);
     }
 
 
@@ -157,10 +159,10 @@ public class SmileApplicationContext implements ApplicationContext {
          */
         //TODO 读取配置信息 创建Properties
         PropertiesLoaderTools.loadProperties();
-        ConfigurableEnvironment configurableEnvironment = this.prepareEnvironment(args,new Properties());
+        ConfigurableEnvironment configurableEnvironment = this.prepareEnvironment(args, new Properties());
         Map<String, String> systemEnvironment = configurableEnvironment.getSystemEnvironment();
-        Banner.printBanner(configurableEnvironment.getProperty("server.banner","D3Banner"));
-        Boolean isPrintClass = Boolean.parseBoolean(systemEnvironment.getOrDefault("server.classLoad","false"));
+        Banner.printBanner(configurableEnvironment.getProperty("server.banner", "D3Banner"));
+        Boolean isPrintClass = Boolean.parseBoolean(systemEnvironment.getOrDefault("server.classLoad", "false"));
         Set<Class<?>> classesByPackage = null;
         try {
             /**
@@ -195,7 +197,7 @@ public class SmileApplicationContext implements ApplicationContext {
         /**
          * 添加到工具类IE
          */
-        SmileContextTools.loadContext(this);
+        SmileContextTools.loadContext(configurableApplicationContext);
         return configurableApplicationContext;
     }
 
@@ -212,11 +214,12 @@ public class SmileApplicationContext implements ApplicationContext {
 
     /**
      * 将配置信息与ioc容器传给扩展类->加载扩展的上下文
+     *
      * @param configApplicationContext
      * @return
      */
-    private  Consumer<ExtApplicationContext> mergeExtContext(ConfigApplicationContext configApplicationContext){
-        return ext->{
+    private Consumer<ExtApplicationContext> mergeExtContext(ConfigApplicationContext configApplicationContext) {
+        return ext -> {
             ext.mergeContext(configApplicationContext);
         };
     }
@@ -231,13 +234,20 @@ public class SmileApplicationContext implements ApplicationContext {
     private synchronized void processEarlyBeans() {
         for (Map.Entry<String, BeanDefinition> entry : delayBeans.entrySet()) {
             BeanDefinition myBean = entry.getValue();
+            //判断ioc容器中是否已经存在,如果已经存在就跳过
+            if (getBean(myBean.getClazz()) != null) {
+                return;
+            }
             try {
                 /**
                  * 最后一次机会如果没有注入就直接跑错
                  */
-                if (autowireFields(myBean.getInstance(), myBean.getClazz(), true)) {
+
+                if (autowireFields(myBean.getInstance(), myBean.getClazz(), false)) {
                     registeredBeans.put(entry.getKey(), myBean);
                     delayBeans.remove(entry.getKey());
+                } else {
+                    continue;
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -255,6 +265,9 @@ public class SmileApplicationContext implements ApplicationContext {
                 }
             }
         }
+        if (delayBeans.size()>0){
+            processEarlyBeans();
+        }
     }
 
     /**
@@ -262,9 +275,9 @@ public class SmileApplicationContext implements ApplicationContext {
      */
     public void scanComponent(Class<?> nextCls) {
         SmileComponent declaredAnnotation = nextCls.getDeclaredAnnotation(SmileComponent.class);
-        SmileService declaredServiceAnnotation= nextCls.getDeclaredAnnotation(SmileService.class);
+        SmileService declaredServiceAnnotation = nextCls.getDeclaredAnnotation(SmileService.class);
         Object beanInstance = null;
-        if (declaredAnnotation != null||declaredServiceAnnotation!=null) {
+        if (declaredAnnotation != null || declaredServiceAnnotation != null) {
             boolean anInterface = nextCls.isInterface();
             //当前扫描的类是一个接口
             if (anInterface) {
@@ -280,9 +293,9 @@ public class SmileApplicationContext implements ApplicationContext {
                 if (smileProxyAspect != null) {
                     beanInstance = CGLibProxy.instance().setProxyObject(beanInstance).toProxyObject(nextCls);
                 }
-                String beanName ="";
-                if (declaredAnnotation!=null){
-                    beanName=  declaredAnnotation.vlaue();
+                String beanName = "";
+                if (declaredAnnotation != null) {
+                    beanName = declaredAnnotation.vlaue();
                 }
                 if (StringTools.isEmpty(beanName)) {
                     beanName = nextCls.getSimpleName();
@@ -311,7 +324,7 @@ public class SmileApplicationContext implements ApplicationContext {
                  */
                 createBeansByMethodsOfClass(beanInstance, nextCls);
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
 
         }
@@ -328,9 +341,26 @@ public class SmileApplicationContext implements ApplicationContext {
      */
     private void createBeansByMethodsOfClass(Object instance, Class<?> clazz) throws InvocationTargetException, IllegalAccessException {
         List<Method> methods = getMethodsWithAnnotation(clazz, SmileBean.class);
+        Collections.sort(methods, new Comparator<Method>() {
+            @Override
+            public int compare(Method o1, Method o2) {
+                return o1.getParameterTypes().length - o2.getParameterTypes().length;
+            }
+        });
         for (Method method : methods) {
             method.setAccessible(true);
-            Object methodBean = method.invoke(instance);
+            Object methodBean = null;
+            if (method.getParameterTypes().length == 0) {
+                methodBean = method.invoke(instance);
+            } else {
+                //如果有参数,获取参数
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                Object[] args = new Object[parameterTypes.length];
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    args[i] = getBean(parameterTypes[i]);
+                }
+                methodBean = method.invoke(instance, args);
+            }
             Class<?> methodBeanClass = methodBean.getClass();
             //bean name
             SmileBean simpleBean = method.getAnnotation(SmileBean.class);
@@ -457,18 +487,17 @@ public class SmileApplicationContext implements ApplicationContext {
     private BeanDefinition getSimpleBeanByNameOrType(String beanName, Class<?> type, boolean allowEarlyBean) {
         // 1. by name
         BeanDefinition res = registeredBeans.get(beanName);
-        if (res == null && allowEarlyBean) {
-            res = delayBeans.get(beanName);
-        }
-
+//        if (res == null && allowEarlyBean) {
+//            res = delayBeans.get(beanName);
+//        }
         // 2. by type
         if (type != null) {
             if (res == null) {
                 res = getSimpleBeanByType(type, registeredBeans);
             }
-            if (res == null && allowEarlyBean) {
-                res = getSimpleBeanByType(type, delayBeans);
-            }
+//            if (res == null && allowEarlyBean) {
+//                res = getSimpleBeanByType(type, delayBeans);
+//            }
         }
 
         return res;
@@ -476,6 +505,7 @@ public class SmileApplicationContext implements ApplicationContext {
 
     /**
      * search bean by type in certain beans map
+     *
      * @param type
      * @param beansMap
      * @return
@@ -536,7 +566,7 @@ public class SmileApplicationContext implements ApplicationContext {
 
     @Override
     public void setStartupDate(long startupDate) {
-    this.startTime=startupDate;
+        this.startTime = startupDate;
     }
 
     @Override

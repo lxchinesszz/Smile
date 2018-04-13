@@ -26,6 +26,7 @@ import org.smileframework.ioc.util.SmileServerReturn;
  */
 public class SmileApplication {
 
+
     public static ConfigurableApplicationContext run(Class cls, String[] args) {
         /**
          * 获取基础包

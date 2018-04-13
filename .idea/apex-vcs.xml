@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ApexVcsIndex">
+    <index-move-record>
+      <option name="firstPath" value="/smile-tool/src/main/java/org/smileframework/tool/stream/StreamTools.java" />
+      <option name="path" value="/smile-tool/src/main/java/org/smileframework/tool/io/StreamTools.java" />
+    </index-move-record>
+  </component>
+</project>

@@ -5,6 +5,8 @@ import org.json.JSONObject;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * @Package: org.smileframework.tool.properties
@@ -24,27 +26,10 @@ public class YamlTools {
     }
 
     public static void main(String[] args) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("a", "a");
-        jsonObject.put("a.b", "b");
-        System.out.println(jsonObject.toString());
-        System.out.println(readJsonAndCreateYaml(jsonObject.toString()));
-
-        String yamlContent = "redis:\n" +
-                "  info:\n" +
-                "    ip: 192.168.1.11\n" +
-                "    port: 6379\n" +
-                "    select: 1\n" +
-                "    maxIdle: 24\n" +
-                "    Maxtotal: 48\n" +
-                "    idleTimeMillis: 10000\n" +
-                "    minIdle: 4\n" +
-                "    maxWailMills: 30\n" +
-                "    onBorrow: true\n" +
-                "    onReturn: true";
-        //yaml转map
-        Map map = readYamlToMap(yamlContent);
-
+        String substring = UUID.randomUUID().toString().replaceAll("-", "");
+        System.out.println(substring);
+        //appKey: 5341594848
+        //appSecret: 1358dda1ec6a41a7b0f0b0f0ec1bc88f
     }
 
 }

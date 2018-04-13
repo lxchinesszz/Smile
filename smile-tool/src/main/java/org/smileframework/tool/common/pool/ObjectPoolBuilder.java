@@ -1,6 +1,7 @@
 package org.smileframework.tool.common.pool;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.smileframework.tool.date.StopWatch;
 import org.smileframework.tool.proxy.Jay2;
 
 import java.util.Date;
@@ -51,9 +52,33 @@ public class ObjectPoolBuilder<T> {
         System.out.println(objectPool3.borrowObject().hashCode());
         System.out.println(objectPool3.borrowObject().hashCode());
         System.out.println(objectPool3.borrowObject().hashCode());
-        System.out.println(objectPool3.borrowObject().hashCode());
-//        objectPool3.returnObject();
+        Date date = objectPool3.borrowObject();
+        System.out.println(date.hashCode());
+        System.out.println(config.getMaxIdle());
+        objectPool3.returnObject(date);
         System.out.println(config.getMaxIdle());
 
+        test();
+
+    }
+
+    public static void test(){
+        StopWatch stopWatch=new StopWatch();
+        stopWatch.start("对象池构建对象耗时");
+        ObjectPool<Jay2> objectPool1 = new ObjectPoolBuilder().setObject(new Jay2()).create();
+        for (int i = 0; i < 10000000; i++) {
+            Jay2 jay2 = objectPool1.borrowObject();
+            objectPool1.returnObject(jay2);
+        }
+        stopWatch.stop();
+
+        stopWatch.start("强引用构建对象耗时");
+        for (int i = 0; i < 10000000; i++) {
+            Jay2 jay2 = new Jay2();
+        }
+        stopWatch.stop();
+
+        System.out.println(stopWatch.prettyPrint());
     }
 }
+

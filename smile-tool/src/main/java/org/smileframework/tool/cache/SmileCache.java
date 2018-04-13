@@ -7,6 +7,7 @@ import org.smileframework.tool.threadpool.SmileThreadPoolExecutor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,6 +64,7 @@ public final class SmileCache {
                 .recordStats()
                 //设置缓存的移除通知
                 .removalListener(removalListener)
+                .weakKeys().weakValues()//其他引用方法
                 //build方法中可以指定CacheLoader，在缓存不存在时通过CacheLoader的实现自动加载缓存
                 .build(cacheLoader);
         return loadingCache;
@@ -72,7 +74,7 @@ public final class SmileCache {
         Map map = new HashMap();
         map.put("1", 1);
         map.put("2", 2);
-        map.put("A",3);
+        map.put("A", 3);
         SmileCache smileCache = new SmileCache();
         CacheLoader<String, Object> cacheLoader = new CacheLoader<String, Object>() {
             @Override
@@ -141,5 +143,14 @@ public final class SmileCache {
         stopwatch2.stop();
         System.out.println(stopwatch2.getLastTaskTimeMillis());
         System.out.println(stopwatch2.prettyPrint());
+        int i = 0;
+        System.out.println(i++);
+        System.out.println(i++);
+        i = 0;
+        System.out.println(++i);
+        System.out.println(++i);
+
+        int segmentSize = 1;
+        System.out.println(segmentSize<<1);
     }
 }

@@ -10,10 +10,8 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.client.HttpClients;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+
+import javax.net.ssl.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -73,7 +71,7 @@ public class HttpsBuilder {
         SSLContext sc = null;
         try {
             sc = SSLContext.getInstance("SSLv3");
-
+            // 用于对证书的校验
             // 实现一个X509TrustManager接口，用于绕过验证，不用修改里面的方法
             X509TrustManager trustManager = new X509TrustManager() {
                 //该方法检查客户端的证书，若不信任该证书则抛出异常。由于我们不需要对客户端进行认证，
@@ -108,10 +106,23 @@ public class HttpsBuilder {
 
 
     public HttpsBuilder setIgnoreVerifySSL(SSLContext sslContext) {
+        return setIgnoreVerifySSL(sslContext, "TLSv1.2");
+    }
+
+    public HttpsBuilder setIgnoreVerifySSL(SSLContext sslContext, String TLSProtocol) {
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, new String[]{TLSProtocol},
+                null, new HostnameVerifier() {
+            //允许https
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+
+        });
         Registry<ConnectionSocketFactory> socketFactoryRegistry
                 = RegistryBuilder.<ConnectionSocketFactory>create().register("http",
                 PlainConnectionSocketFactory.INSTANCE).register("https",
-                new SSLConnectionSocketFactory(sslContext)).build();
+                sslsf).build();
         connMgr = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
         return this;
     }

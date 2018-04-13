@@ -27,7 +27,13 @@ public class BeanA {
 
     @SmileBean
     public BeanB beanB() {
-        return new BeanB("hi. iam is beanB");
+        return new BeanB("hi. iam is beanB X");
+    }
+
+    @SmileBean
+    public BeanB beanBX(BeanB b){
+        b.setContent("XXXX");
+        return b;
     }
 
 }

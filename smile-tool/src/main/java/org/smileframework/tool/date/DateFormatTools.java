@@ -13,14 +13,24 @@ public class DateFormatTools {
     public static final String Y_M_D_H_M_S="yyyy-MM-dd HH:mm:ss";
     public static final String Y_M_D="yyyy-MM-dd";
 
+    private DateFormatTools(){}
+
     public static String getDateFormat(String timeformat) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(timeformat);
-        return simpleDateFormat.format(new Date());
+        return getDateFormat(timeformat,null);
     }
 
 
     public static String getDateFormat(String timeformat, Date date) {
+        if (date==null){
+            date=new Date();
+        }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(timeformat);
         return simpleDateFormat.format(date);
     }
+
+    public static long getTime(){
+        return System.currentTimeMillis();
+    }
+
+
 }
