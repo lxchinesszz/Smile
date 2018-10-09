@@ -18,6 +18,14 @@ public class ObjectPool<T> {
         }
     }
 
+    public int getNumActive(){
+        return this.genericObjectPool.getNumActive();
+    }
+
+    public int getNumIdle(){
+        return this.genericObjectPool.getNumIdle();
+    }
+
     protected void setConfig(GenericObjectPoolConfig config){
         genericObjectPool.setConfig(config);
     }

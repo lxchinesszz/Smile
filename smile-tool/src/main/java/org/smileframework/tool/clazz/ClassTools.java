@@ -26,6 +26,7 @@ public abstract class ClassTools {
 
     /**
      * 获取原始类型,主要处理从被代理的对象中,获取原始参数
+     *
      * @param instance
      * @return
      */
@@ -35,9 +36,9 @@ public abstract class ClassTools {
     }
 
     public static Class<?> getUserClass(Class<?> clazz) {
-        if(clazz != null && clazz.getName().contains("$$")) {
+        if (clazz != null && clazz.getName().contains("$$")) {
             Class<?> superclass = clazz.getSuperclass();
-            if(superclass != null && Object.class != superclass) {
+            if (superclass != null && Object.class != superclass) {
                 return superclass;
             }
         }
@@ -46,6 +47,7 @@ public abstract class ClassTools {
 
     /**
      * 将 objs,装换targetClass类型的List
+     *
      * @param objs
      * @param targetClass
      * @param <T>
@@ -291,5 +293,29 @@ public abstract class ClassTools {
         }
         return clazz;
     }
+
+
+    /**
+     * 判读是否存在
+     * @param className
+     * @return
+     */
+    public static boolean isPresent(String className) {
+        return isPresent(className, null);
+    }
+
+    public static boolean isPresent(String className, ClassLoader classLoader) {
+        Class<?> aClass = null;
+        try {
+            if (classLoader==null){
+                classLoader=getDefaultClassLoader();
+            }
+            aClass = Class.forName(className, false, classLoader);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return aClass != null ? true : false;
+    }
+
 
 }

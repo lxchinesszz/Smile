@@ -1,6 +1,6 @@
 package org.smileframework.tool.clazz;
 
-import org.smileframework.tool.json.JsonUtils;
+import org.smileframework.tool.json.JsonTools;
 
 /**
  * @Package: org.smileframework.tool.clazz
@@ -38,7 +38,7 @@ public class CastConvert {
             return Long.parseLong(value);
         }
         if (isJson) {
-            return JsonUtils.fromJsonByJackson(value, cls);
+            return JsonTools.fromJsonByJackson(value, cls);
         }
         return value;
     }

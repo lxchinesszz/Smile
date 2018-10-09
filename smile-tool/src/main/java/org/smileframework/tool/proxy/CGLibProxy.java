@@ -22,6 +22,19 @@ public class CGLibProxy implements MethodInterceptor {
     private Object object;
 
     /**
+     * 利用泛型
+     * 获取代理类型
+     *
+     * @param cls
+     * @param <T>
+     * @return
+     */
+    public <T> T getProxy(Class<T> cls) {
+        this.cls = cls;
+        return (T) Enhancer.create(cls, this);
+    }
+
+    /**
      * 预处理
      * 当代理逻辑中依赖其他类,需要提前注入时候,仅扩展此类
      *
@@ -72,18 +85,6 @@ public class CGLibProxy implements MethodInterceptor {
     }
 
 
-    /**
-     * 利用泛型
-     * 获取代理类型
-     *
-     * @param cls
-     * @param <T>
-     * @return
-     */
-    public <T> T getProxy(Class<T> cls) {
-        this.cls = cls;
-        return (T) Enhancer.create(cls, this);
-    }
 
     /**
      * 获取代理类

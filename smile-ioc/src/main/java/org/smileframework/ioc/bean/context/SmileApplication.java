@@ -3,6 +3,7 @@ package org.smileframework.ioc.bean.context;
 
 import org.smileframework.ioc.bean.annotation.SmileBootApplication;
 import org.smileframework.ioc.util.SmileServerReturn;
+import org.smileframework.tool.asserts.Assert;
 /**
  * Copyright (c) 2015 The Smile-Boot Project
  *
@@ -27,11 +28,15 @@ import org.smileframework.ioc.util.SmileServerReturn;
 public class SmileApplication {
 
 
-    public static ConfigurableApplicationContext run(Class cls, String[] args) {
+    public static ConfigurableApplicationContext run(Class primarySources, String[] args) {
+        /**
+         * 主类不能为空
+         */
+        Assert.notNull(primarySources, "PrimarySources must not be null");
         /**
          * 获取基础包
          */
-        String baseRootPackage = getBaseRootPackage(cls);
+        String baseRootPackage = getBaseRootPackage(primarySources);
         /**
          * 实例化本类,目的获取非静态方法
          */

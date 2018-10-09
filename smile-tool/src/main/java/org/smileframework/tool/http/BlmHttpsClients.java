@@ -21,7 +21,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smileframework.tool.json.JsonUtils;
+import org.smileframework.tool.json.JsonTools;
 import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -239,7 +239,7 @@ public class BlmHttpsClients {
             }
 
         }
-        logger.info("发送信息:{},返回:{},请求地址:{},请求状态:{}", JsonUtils.toJson(paramMap), result, url, httpCode);
+        logger.info("发送信息:{},返回:{},请求地址:{},请求状态:{}", JsonTools.toJson(paramMap), result, url, httpCode);
         return result;
     }
 
@@ -282,7 +282,7 @@ public class BlmHttpsClients {
             }
 
         }
-        logger.info("发送信息:{},返回:{},请求地址:{},请求状态:{}", JsonUtils.toJson(paramMap), result, url, httpCode);
+        logger.info("发送信息:{},返回:{},请求地址:{},请求状态:{}", JsonTools.toJson(paramMap), result, url, httpCode);
         return result;
     }
 }

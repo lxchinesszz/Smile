@@ -82,6 +82,11 @@ public class EnvironmentConverter implements ConfigurableEnvironment {
 
     }
 
+    @Override
+    public <T> T getProperty(String var1, Class<?> targetType, T defaultValue) {
+        return null;
+    }
+
     /**
      * 系统配置信息
      * @return

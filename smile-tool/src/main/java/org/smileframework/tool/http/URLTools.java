@@ -3,7 +3,7 @@ package org.smileframework.tool.http;
 import com.google.common.base.Splitter;
 import org.slf4j.Logger;
 import org.smileframework.tool.common.Default;
-import org.smileframework.tool.json.JsonUtils;
+import org.smileframework.tool.json.JsonTools;
 import org.smileframework.tool.logmanage.LoggerManager;
 import org.smileframework.tool.string.StringTools;
 
@@ -121,7 +121,7 @@ public class URLTools {
         System.out.println(getQuery("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&sd=23"));////name=age&sd=23
         System.out.println(getAuthority("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&sd=23"));//blog.csdn.net:3201
         System.out.println(getPath("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&sd=23"));///yongh701/article/details/46894417
-        System.out.println(JsonUtils.toJson(getQueryParameter("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&")));
+        System.out.println(JsonTools.toJson(getQueryParameter("http://blog.csdn.net:3201/yongh701/article/details/46894417?name=age&")));
         System.out.println(getPath("/smile/get?orderId=2334"));
     }
 

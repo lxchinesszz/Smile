@@ -8,8 +8,8 @@ package org.smileframework.tool.proxy;
  */
 @SmileProxyAspect(proxyAspect = ControllerProxy.class,methods = {"say","dance"})
 public class Jay2 {
-
     private String name;
+
     public Jay2(){
     }
 

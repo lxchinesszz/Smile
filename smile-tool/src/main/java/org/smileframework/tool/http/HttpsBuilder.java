@@ -1,5 +1,6 @@
 package org.smileframework.tool.http;
 
+import org.apache.http.HttpHost;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.Registry;
@@ -127,6 +128,25 @@ public class HttpsBuilder {
         return this;
     }
 
+    /**
+     * 创建一个包含代理的客户端
+     * @param proxyIp
+     * @param port
+     * @param type
+     * @return
+     */
+    public CloseableHttpClient createProxyHttpClient(String proxyIp, int port, String type) {
+        //设置代理IP、端口、协议（请分别替换）
+        HttpHost proxy = new HttpHost(proxyIp, port, type);
+
+        //把代理设置到请求配置
+        RequestConfig defaultRequestConfig = RequestConfig.custom()
+                .setProxy(proxy)
+                .build();
+        //实例化CloseableHttpClient对象
+        return HttpClients.custom().setConnectionManager(connMgr).setDefaultRequestConfig(defaultRequestConfig).build();
+
+    }
 
     /**
      * 默认 .setRetryHandler(httpRequestRetryHandler)

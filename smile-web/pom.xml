@@ -24,8 +24,8 @@
             <groupId>org.smileframework.boot</groupId>
             <artifactId>org.smileframework.ioc</artifactId>
             <version>2.0-SNAPSHOT</version>
+            <optional>true</optional>
         </dependency>
-
 
         <dependency>
             <groupId>org.javassist</groupId>

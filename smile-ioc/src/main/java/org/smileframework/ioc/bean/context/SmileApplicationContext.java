@@ -2,10 +2,12 @@ package org.smileframework.ioc.bean.context;
 
 import com.google.common.collect.ArrayListMultimap;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smileframework.ioc.bean.annotation.InsertBean;
 import org.smileframework.ioc.bean.annotation.SmileBean;
 import org.smileframework.ioc.bean.annotation.SmileComponent;
 import org.smileframework.ioc.bean.annotation.SmileService;
+import org.smileframework.ioc.util.ApplicationPid;
 import org.smileframework.ioc.util.Banner;
 import org.smileframework.ioc.util.ConcurrentHashSet;
 import org.smileframework.ioc.util.SmileContextTools;
@@ -49,7 +51,8 @@ import java.util.function.Consumer;
  * @author: liuxin
  * @date: 2017/11/17 下午11:55
  */
-public class SmileApplicationContext implements ApplicationContext {
+public class  SmileApplicationContext implements ApplicationContext {
+    private Logger logger= LoggerFactory.getLogger(SmileApplicationContext.class);
 
     private static final Set<ExtApplicationContext> extApplicationContexts = new HashSet<>();
     /**
@@ -158,11 +161,13 @@ public class SmileApplicationContext implements ApplicationContext {
          * 2. 处理配置信息
          */
         //TODO 读取配置信息 创建Properties
+
         PropertiesLoaderTools.loadProperties();
         ConfigurableEnvironment configurableEnvironment = this.prepareEnvironment(args, new Properties());
         Map<String, String> systemEnvironment = configurableEnvironment.getSystemEnvironment();
         Banner.printBanner(configurableEnvironment.getProperty("server.banner", "D3Banner"));
         Boolean isPrintClass = Boolean.parseBoolean(systemEnvironment.getOrDefault("server.classLoad", "false"));
+        logger.info("The current application system pid:["+ new ApplicationPid()+"]");
         Set<Class<?>> classesByPackage = null;
         try {
             /**

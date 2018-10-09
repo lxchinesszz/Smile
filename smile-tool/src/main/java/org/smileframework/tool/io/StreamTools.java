@@ -1,6 +1,6 @@
 package org.smileframework.tool.io;
 
-import org.smileframework.tool.json.JsonUtils;
+import org.smileframework.tool.json.JsonTools;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class StreamTools {
 
     public static <T> T convertStringToObject(BufferedReader reader, Class<T> cls) {
         String var1 = convertStreamToString(reader);
-        return JsonUtils.fromJson(var1, cls);
+        return JsonTools.fromJson(var1, cls);
     }
 
     public static String convertStreamToString(BufferedReader reader) {
@@ -45,7 +45,7 @@ public class StreamTools {
 
     public static <T> T convertStringToObject(InputStream inputStream, Class<T> cls) {
         String var1 = convertStreamToString(inputStream);
-        return JsonUtils.fromJson(var1, cls);
+        return JsonTools.fromJson(var1, cls);
     }
 
     public static String convertStreamToString(InputStream is) {
