@@ -3,6 +3,7 @@ package org.smileframework.sample.model;
 import org.smileframework.ioc.bean.annotation.InsertBean;
 import org.smileframework.ioc.bean.annotation.SmileBean;
 import org.smileframework.ioc.bean.annotation.SmileComponent;
+import org.smileframework.tool.annotation.AnnotationTools;
 
 
 /**
@@ -34,6 +35,10 @@ public class BeanA {
     public BeanB beanBX(BeanB b){
         b.setContent("XXXX");
         return b;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(AnnotationTools.isContainsAnnotation(BeanA.class,SmileComponent.class));
     }
 
 }

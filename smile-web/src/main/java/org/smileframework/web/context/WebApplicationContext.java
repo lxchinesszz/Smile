@@ -2,7 +2,7 @@ package org.smileframework.web.context;
 
 import org.slf4j.Logger;
 import org.smileframework.ioc.bean.annotation.SmileComponent;
-import org.smileframework.ioc.bean.context.BeanDefinition;
+import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
 import org.smileframework.ioc.bean.context.ConfigApplicationContext;
 import org.smileframework.ioc.bean.context.ConfigurableEnvironment;
 import org.smileframework.ioc.bean.context.ExtApplicationContext;
@@ -53,7 +53,8 @@ public class WebApplicationContext implements ExtApplicationContext {
         WebContextTools.setWebApplicationContext(this);
         NettyBootstrapServer server = new NettyBootstrapServer();
         ConfigurableEnvironment configurableEnvironment = extApplicationContext.getConfigurableEnvironment();
-        Integer port = Integer.parseInt(configurableEnvironment.getProperty("server.port","10086"));
+//        Integer port = Integer.parseInt(configurableEnvironment.getProperty("server.port","10086"));
+        int port = 10086;
         String pid = getPid();
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -103,7 +104,7 @@ public class WebApplicationContext implements ExtApplicationContext {
         }
         Consumer<Map.Entry<String, BeanDefinition>> entryConsumer = entry -> {
             BeanDefinition beanDefinition = entry.getValue();
-            Class<?> controllerClass = beanDefinition.getClazz();
+            Class<?> controllerClass = null;//beanDefinition.getClazz();
             RestController annotation = controllerClass.getAnnotation(RestController.class);
             String oneUrl = annotation.value();
             Method[] methods = controllerClass.getMethods();
@@ -129,8 +130,8 @@ public class WebApplicationContext implements ExtApplicationContext {
      * @param beanDefinition bean描述
      */
     public void bindGetMethod(String oneUrl, Method method, BeanDefinition beanDefinition) {
-        Object controllerInstance = beanDefinition.getInstance();
-        Package aPackage = beanDefinition.getClazz().getPackage();
+        Object controllerInstance =null;// beanDefinition.getInstance();
+        Package aPackage = null;//beanDefinition.getClazz().getPackage();
         GetMapping getMapping = method.getAnnotation(GetMapping.class);
         String twoUrl = getMapping.value();
         String[] parameterNames = WebTools.getParameterNames(method);
@@ -151,8 +152,8 @@ public class WebApplicationContext implements ExtApplicationContext {
      * @param beanDefinition bean描述
      */
     public void bindPostMethod(String oneUrl, Method method, BeanDefinition beanDefinition) {
-        Object controllerInstance = beanDefinition.getInstance();
-        Package aPackage = beanDefinition.getClazz().getPackage();
+        Object controllerInstance = null;//beanDefinition.getInstance();
+        Package aPackage =null;// beanDefinition.getClazz().getPackage();
         PostMapping postMapping = method.getAnnotation(PostMapping.class);
         String twoUrl = postMapping.value();
         String[] parameterNames = WebTools.getParameterNames(method);

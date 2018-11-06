@@ -1,7 +1,7 @@
 package org.smileframework.ioc.util;
 
 
-import org.smileframework.ioc.bean.context.Environment;
+import org.smileframework.ioc.bean.core.env.Environment;
 
 import java.io.PrintStream;
 

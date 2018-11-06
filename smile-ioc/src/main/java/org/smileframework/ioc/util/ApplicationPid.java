@@ -12,7 +12,7 @@ public class ApplicationPid {
     private final String pid;
 
     public ApplicationPid() {
-        this.pid = this.getPid();
+        this.pid =getPid();
     }
 
     protected ApplicationPid(String pid) {
@@ -27,7 +27,7 @@ public class ApplicationPid {
             return null;
         }
     }
-
+    @Override
     public String toString() {
         return this.pid == null?"???":this.pid;
     }

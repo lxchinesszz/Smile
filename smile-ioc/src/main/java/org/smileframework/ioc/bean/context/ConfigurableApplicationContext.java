@@ -1,5 +1,6 @@
 package org.smileframework.ioc.bean.context;
 
+import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
 import org.smileframework.tool.date.StopWatch;
 
 import java.lang.annotation.Annotation;
@@ -61,7 +62,8 @@ public class ConfigurableApplicationContext implements ConfigApplicationContext 
     }
 
     public String getProperty(String key){
-       return configurableEnvironment.getProperty(key);
+//       return configurableEnvironment.getProperty(key);
+        return null;
     }
 
     @Override
@@ -77,13 +79,15 @@ public class ConfigurableApplicationContext implements ConfigApplicationContext 
     @Override
     public Object getBean(String beanName) {
         BeanDefinition beanDefinition = registeredBeans.get(beanName);
-        return beanDefinition.getInstance();
+//        return beanDefinition.getInstance();
+        return null;
     }
 
     @Override
     public <T> T getBean(String beanName, Class<T> requiredType) {
         BeanDefinition beanDefinition = registeredBeans.get(beanName);
-        return (requiredType.cast(beanDefinition.getInstance()));
+//        return (requiredType.cast(beanDefinition.getInstance()));
+        return null;
     }
 
     @Override
@@ -100,11 +104,11 @@ public class ConfigurableApplicationContext implements ConfigApplicationContext 
      */
     public <T> Map<String, T> getBeanByType(Class<T> cls) {
         Map<String, T> res = new HashMap<>();
-        registeredBeans.entrySet().stream().filter(entry ->
-                entry.getValue().getClazz().isAssignableFrom(cls)
-        ).forEach(entry -> {
-            res.put(entry.getKey(), cls.cast(entry.getValue().getInstance()));
-        });
+//        registeredBeans.entrySet().stream().filter(entry ->
+//                entry.getValue().getClazz().isAssignableFrom(cls)
+//        ).forEach(entry -> {
+//            res.put(entry.getKey(), cls.cast(entry.getValue().getInstance()));
+//        });
         return res;
     }
 
@@ -124,11 +128,11 @@ public class ConfigurableApplicationContext implements ConfigApplicationContext 
     @Override
     public Map<String, BeanDefinition> getBeanByAnnotation(Class<? extends Annotation> cls) {
         Map<String, BeanDefinition> registeredAnnotationBeans = new ConcurrentHashMap<>();
-        registeredBeans.entrySet().stream().filter(entry ->
-                entry.getValue().getClazz().isAnnotationPresent(cls)
-        ).forEach(entry -> {
-            registeredAnnotationBeans.put(entry.getKey(), entry.getValue());
-        });
+//        registeredBeans.entrySet().stream().filter(entry ->
+//                entry.getValue().getClazz().isAnnotationPresent(cls)
+//        ).forEach(entry -> {
+//            registeredAnnotationBeans.put(entry.getKey(), entry.getValue());
+//        });
 
         return registeredAnnotationBeans;
     }

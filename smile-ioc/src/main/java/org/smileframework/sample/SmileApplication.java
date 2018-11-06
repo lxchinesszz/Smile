@@ -3,8 +3,7 @@ package org.smileframework.sample;
 
 import org.smileframework.ioc.bean.annotation.SmileBootApplication;
 import org.smileframework.ioc.bean.context.ConfigurableApplicationContext;
-import org.smileframework.ioc.bean.context.Environment;
-import org.smileframework.ioc.bean.context.SmileApplicationContext;
+import org.smileframework.ioc.bean.core.env.Environment;
 import org.smileframework.ioc.util.SpringImageBanner;
 import org.smileframework.sample.model.BeanA;
 import org.smileframework.sample.model.BeanB;

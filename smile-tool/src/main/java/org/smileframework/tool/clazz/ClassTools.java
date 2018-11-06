@@ -8,6 +8,7 @@ import org.smileframework.tool.string.StringTools;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -304,6 +305,12 @@ public abstract class ClassTools {
         return isPresent(className, null);
     }
 
+    /**
+     * 判断当前是否存在该类
+     * @param className
+     * @param classLoader
+     * @return
+     */
     public static boolean isPresent(String className, ClassLoader classLoader) {
         Class<?> aClass = null;
         try {
@@ -317,5 +324,13 @@ public abstract class ClassTools {
         return aClass != null ? true : false;
     }
 
+    /**
+     * 判断是否是抽象类
+     * @param cls
+     * @return
+     */
+    public static boolean isAbstract(Class cls){
+       return Modifier.isAbstract(cls.getModifiers());
+    }
 
 }

@@ -48,7 +48,7 @@ public class SmileApplication {
         SmileApplicationContextInitializer simpleApplicationContextInitializer =
                 application.createSimpleApplicationContextInitializer(baseRootPackage, args);
 
-        SmileApplicationContext smileApplicationContext = new SmileApplicationContext();
+        SmileAnnotationApplicationContext smileApplicationContext = new SmileAnnotationApplicationContext(primarySources);
         /**
          * 然后有initialize去执行SmileApplication中的scan方法去根据基础目录,加载子目录下的class文件及jar文件
          * 构建bean描述类BeanDefinition,最后构建出IOC

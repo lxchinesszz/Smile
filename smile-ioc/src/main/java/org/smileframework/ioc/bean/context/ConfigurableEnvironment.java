@@ -25,7 +25,7 @@ import java.util.Properties;
  * @author: liuxin
  * @date: 2017/12/7 下午12:50
  */
-public interface ConfigurableEnvironment extends Environment {
+public interface ConfigurableEnvironment {
 
     /**
      * 设置启动信息

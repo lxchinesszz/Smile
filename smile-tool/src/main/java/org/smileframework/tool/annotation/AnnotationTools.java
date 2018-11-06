@@ -23,6 +23,33 @@ public class AnnotationTools {
         return Arrays.asList(method.getAnnotations());
     }
 
+    public static List<Annotation> getAnnotationFromClass(Class cls) {
+        return Arrays.asList(cls.getAnnotations());
+    }
+
+    /**
+     * @param cls         将要判断的类
+     * @param annotations 注解集合
+     * @return 是否将要判断的类上，是否包含注解集合任意注解
+     */
+    public static boolean isContainsAnnotation(Class cls, Class... annotations) {
+        return isContainsAnnotation(cls, Arrays.asList(annotations));
+    }
+
+    /**
+     * @param cls         将要判断的类
+     * @param annotations 注解集合
+     * @return 是否将要判断的类上，是否包含注解集合任意注解
+     */
+    public static boolean isContainsAnnotation(Class cls, Collection<Class> annotations) {
+        for (Class annotation : annotations) {
+            if (null != cls.getAnnotation(annotation)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * 获取注解对象参数值
      *
@@ -70,6 +97,7 @@ public class AnnotationTools {
 
     /**
      * 获取注解中所有的字段名
+     * 因为注解就是接口，里面的都是方法
      *
      * @param annotationType
      * @return
@@ -78,6 +106,32 @@ public class AnnotationTools {
         Method[] declaredMethods = annotationType.getDeclaredMethods();
         return ClassTools.castByArray(declaredMethods, Method.class);
     }
+
+    /**
+     * 查询字节码上面的注解
+     *
+     * @param beanCls
+     * @param annotationType
+     * @param <A>
+     * @return
+     */
+    public static <A extends Annotation> A findAnnotation(Class beanCls, Class<A> annotationType) {
+        if (!isContainsAnnotation(beanCls, annotationType)) {
+            return null;
+        }
+        return (A) beanCls.getDeclaredAnnotation(annotationType);
+    }
+
+    /**
+     * 获取所有的注解
+     * @param beanCls
+     * @return
+     */
+    public static List<? extends Annotation> findAnnotations(Class beanCls){
+        Annotation[] declaredAnnotations = beanCls.getDeclaredAnnotations();
+        return Arrays.asList(declaredAnnotations);
+    }
+
 
 
     public static void main(String[] args) throws Exception {
@@ -92,6 +146,7 @@ public class AnnotationTools {
         System.out.println(name);
 
 
+//isContainsAnnotation()
     }
 
 }

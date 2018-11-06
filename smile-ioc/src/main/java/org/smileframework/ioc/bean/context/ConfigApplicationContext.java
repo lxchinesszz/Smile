@@ -1,5 +1,6 @@
 package org.smileframework.ioc.bean.context;
 
+import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
 import org.smileframework.tool.date.StopWatch;
 
 import java.lang.annotation.Annotation;

@@ -45,7 +45,7 @@ public class EnvironmentConverter implements ConfigurableEnvironment {
      * @param key
      * @return
      */
-    @Override
+
     public String getProperty(String key) {
         return properties.getProperty(key);
     }
@@ -56,7 +56,7 @@ public class EnvironmentConverter implements ConfigurableEnvironment {
      * @param defaultValue
      * @return
      */
-    @Override
+
     public String getProperty(String key, String defaultValue) {
         return properties.getProperty(key,defaultValue);
     }
@@ -82,7 +82,7 @@ public class EnvironmentConverter implements ConfigurableEnvironment {
 
     }
 
-    @Override
+
     public <T> T getProperty(String var1, Class<?> targetType, T defaultValue) {
         return null;
     }
