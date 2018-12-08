@@ -1,6 +1,7 @@
 package org.smileframework.ioc.bean.context;
 
 import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
+import org.smileframework.ioc.bean.core.env.ConfigurableEnvironment;
 import org.smileframework.tool.date.StopWatch;
 
 import java.lang.annotation.Annotation;
@@ -28,21 +29,25 @@ import java.util.Map;
  */
 public interface ConfigApplicationContext {
 
-    public  StopWatch getStopWatch();
+    StopWatch getStopWatch();
 
-    Map<String, BeanDefinition> getBeans();
 
-    Object getBean(String var1);
-
-    <T> T getBean(String name, Class<T> requiredType);
-
-    <T> T getBean(Class<T> name);
-
-    boolean containsBean(String var1);
-
+    /**
+     * 获取可配置的
+     * @return
+     */
     ConfigurableEnvironment getConfigurableEnvironment();
 
-//    void addExtApplication(ExtApplicationContext extApplicationContext);
 
-    Map<String, BeanDefinition> getBeanByAnnotation(Class<? extends Annotation> cls);
+    void setEnvironment(ConfigurableEnvironment environment);
+
+
+    /**
+     * 运行扩展类获取bean的副本信息
+     * @return
+     */
+    Map<String, BeanDefinition> getBeanDefinitioinMap();
+
+
+//    void addExtApplication(ExtApplicationContext extApplicationContext);
 }

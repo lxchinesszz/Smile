@@ -8,4 +8,6 @@ import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
  */
 public interface BeanNameGenerator {
     String generateBeanName(BeanDefinition definition);
+
+    String generateBeanName(Class cls);
 }

@@ -1,5 +1,9 @@
 package org.smileframework.ioc.bean.context.beanfactory;
 
+import org.smileframework.ioc.bean.context.beandefinition.GenericBeanDefinition;
+import org.smileframework.ioc.bean.context.beanfactory.convert.TypeConverter;
+import org.smileframework.ioc.bean.context.postprocessor.impl.DependencyDescriptor;
+
 import java.util.Set;
 
 /**
@@ -54,7 +58,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
     void applyBeanPropertyValues(Object existingBean, String beanName) throws Exception;
 
 
-    Object initializeBean(Object existingBean, String beanName) throws Exception;
+    Object initializeBean(Object existingBean, String beanName, GenericBeanDefinition mbd);
 
 
     Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
@@ -70,5 +74,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
     Object resolveDependency( String beanName,
                              Set<String> autowiredBeanNames) throws Exception;
+
+    Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+                             Set<String> autowiredBeanNames, TypeConverter typeConverter);
+
 
 }

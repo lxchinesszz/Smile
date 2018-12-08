@@ -20,7 +20,8 @@ public class ConstructorArgumentValues {
         return this.constructorArgumentValues.add(constructorArgumentValue);
     }
 
-    public Object[] getConstructorArgumentValues() {
-        return indexedArgumentValues.values().toArray();
+    public List<ConstructorArgumentValue> getConstructorArgumentValues() {
+        return this.constructorArgumentValues;
     }
+
 }

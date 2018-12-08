@@ -11,8 +11,10 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Inherited
 public @interface SmileComponent {
+
     String[] basePackages() default {};
 
-    String vlaue() default "";
+    String name() default "";
 }

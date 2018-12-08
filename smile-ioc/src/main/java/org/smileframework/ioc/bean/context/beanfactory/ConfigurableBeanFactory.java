@@ -1,6 +1,11 @@
 package org.smileframework.ioc.bean.context.beanfactory;
 
+import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
+import org.smileframework.ioc.bean.context.beanfactory.convert.TypeConverter;
 import org.smileframework.ioc.bean.context.postprocessor.BeanPostProcessor;
+import org.smileframework.ioc.bean.core.env.PropertyResolver;
+
+import java.util.Map;
 
 /**
  * @author liuxin
@@ -45,5 +50,21 @@ public interface ConfigurableBeanFactory extends SingletonBeanRegistry{
      * @return
      */
     boolean isCurrentlyInCreation(String beanName);
+
+    /**
+     * 可配置的配置信息
+     * @param propertyResolver
+     */
+    void setPropertyResolver(PropertyResolver propertyResolver);
+
+    /**
+     * 指定转换类型
+     * @param typeConverter
+     * @return
+     */
+    TypeConverter setTypeConverter(TypeConverter typeConverter);
+
+
+    Map<String, BeanDefinition> getBeanDefinitioin();
 
 }

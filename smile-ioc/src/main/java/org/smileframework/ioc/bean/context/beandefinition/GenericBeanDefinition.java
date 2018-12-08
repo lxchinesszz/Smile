@@ -2,9 +2,13 @@ package org.smileframework.ioc.bean.context.beandefinition;
 
 import org.smileframework.ioc.bean.context.beanfactory.AutowireCapableBeanFactory;
 import org.smileframework.ioc.bean.context.factorybean.FactoryBean;
+import org.smileframework.tool.clazz.ClassTools;
 import org.smileframework.tool.clazz.LocalVariableTableParameterNameDiscoverer;
 import org.smileframework.tool.clazz.ParameterNameDiscoverer;
 
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,10 +31,11 @@ public class GenericBeanDefinition implements BeanDefinition {
 
     public static final int AUTOWIRE_CONSTRUCTOR = AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR;
 
+    private boolean emptyConstructorFlag;
     /**
      * 构造的依赖放到这里
      */
-    private ConstructorArgumentValues constructorArgumentValues;
+    private List<ConstructorInfo> constructorInfo;
 
     /**
      * 从环境中获取到参数值
@@ -74,6 +79,18 @@ public class GenericBeanDefinition implements BeanDefinition {
      */
     private String destroyMethodName;
 
+    /**
+     * 是否有空构造
+     * @return
+     */
+    public boolean isEmptyConstructorFlag() {
+        return emptyConstructorFlag;
+    }
+
+    public void setEmptyConstructorFlag(boolean emptyConstructorFlag) {
+        this.emptyConstructorFlag = emptyConstructorFlag;
+    }
+
     public boolean isBeforeInstantiationResolved() {
         return beforeInstantiationResolved;
     }
@@ -82,6 +99,7 @@ public class GenericBeanDefinition implements BeanDefinition {
         this.beforeInstantiationResolved = beforeInstantiationResolved;
     }
 
+    @Override
     public String getBeanName() {
         return beanName;
     }
@@ -90,16 +108,18 @@ public class GenericBeanDefinition implements BeanDefinition {
         this.beanName = beanName;
     }
 
+    @Override
     public boolean isFactoryBean() {
         return FactoryBean.class.isAssignableFrom(beanClass);
     }
 
-    public ConstructorArgumentValues getConstructorArgumentValues() {
-        return constructorArgumentValues;
+    @Override
+    public List<ConstructorInfo> getConstructorInfo() {
+        return constructorInfo;
     }
 
-    public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
-        this.constructorArgumentValues = constructorArgumentValues;
+    public void setConstructorInfo(List<ConstructorInfo> constructorInfo) {
+        this.constructorInfo = constructorInfo;
     }
 
     public Map<String, Object> getPropertyValues() {
@@ -110,6 +130,7 @@ public class GenericBeanDefinition implements BeanDefinition {
         this.propertyValues = propertyValues;
     }
 
+    @Override
     public Class getBeanClass() {
         return beanClass;
     }
@@ -164,7 +185,7 @@ public class GenericBeanDefinition implements BeanDefinition {
 
     @Override
     public String getBeanClassName() {
-        return null;
+        return ClassTools.getShortName(this.beanClass);
     }
 
     @Override
@@ -227,4 +248,26 @@ public class GenericBeanDefinition implements BeanDefinition {
         return this.isAutowireCandidate();
     }
 
+    @Override
+    public String toString() {
+        return "GenericBeanDefinition{" +
+                "AUTOWIRE_NO=" + AUTOWIRE_NO +
+                ", constructorInfo=" + constructorInfo +
+                ", propertyValues=" + propertyValues +
+                ", beanName='" + beanName + '\'' +
+                ", beanClass=" + beanClass +
+                ", scope='" + scope + '\'' +
+                ", abstractFlag=" + abstractFlag +
+                ", lazyInit=" + lazyInit +
+                ", autowireMode=" + autowireMode +
+                ", dependencyCheck=" + dependencyCheck +
+                ", dependsOn=" + Arrays.toString(dependsOn) +
+                ", autowireCandidate=" + autowireCandidate +
+                ", primary=" + primary +
+                ", factoryBean=" + factoryBean +
+                ", beforeInstantiationResolved=" + beforeInstantiationResolved +
+                ", initMethodName='" + initMethodName + '\'' +
+                ", destroyMethodName='" + destroyMethodName + '\'' +
+                '}';
+    }
 }

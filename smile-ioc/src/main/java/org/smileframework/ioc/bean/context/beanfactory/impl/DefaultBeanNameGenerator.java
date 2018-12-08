@@ -4,6 +4,8 @@ import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
 import org.smileframework.ioc.bean.context.beandefinition.GenericBeanDefinition;
 import org.smileframework.ioc.bean.context.beanfactory.BeanFactory;
 import org.smileframework.ioc.bean.context.beanfactory.BeanNameGenerator;
+import org.smileframework.ioc.bean.context.factorybean.FactoryBean;
+import org.smileframework.tool.clazz.ClassTools;
 import org.smileframework.tool.string.StringTools;
 
 /**
@@ -26,4 +28,11 @@ public class DefaultBeanNameGenerator implements BeanNameGenerator {
         return name;
     }
 
+    @Override
+    public String generateBeanName(Class beanClass) {
+        boolean factoryBean = FactoryBean.class.isAssignableFrom(beanClass);
+        String name = factoryBean? BeanFactory.FACTORY_BEAN_PREFIX+ StringTools.uncapitalize(ClassTools.getShortName(beanClass)):StringTools.uncapitalize(ClassTools.getShortName(beanClass));
+        return name;
+
+    }
 }

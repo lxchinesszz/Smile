@@ -5,7 +5,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 
 appender("CONSOLE", ConsoleAppender) {
     encoder(PatternLayoutEncoder) {
-        pattern = "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} %p [%thread] %logger{50} as:%L : %msg  %n"
+        pattern = "%d{[yyyy-MM-dd hh:mm:ss,SSS]} %p [%thread] %logger{50} as:%L : %msg  %n"
     }
 }
 root(INFO, ["CONSOLE"])

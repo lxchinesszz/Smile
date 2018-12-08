@@ -71,6 +71,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
     protected void customizePropertySources(MutablePropertySources propertySources) {
     }
 
+
+    public MutablePropertySources getPropertySources() {
+        return propertySources;
+    }
+
     /**
      * Java运行环境信息
      *

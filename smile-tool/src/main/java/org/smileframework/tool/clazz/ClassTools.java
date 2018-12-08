@@ -5,9 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.smileframework.tool.asserts.Assert;
 import org.smileframework.tool.string.ObjectTools;
 import org.smileframework.tool.string.StringTools;
+import sun.awt.SunHints;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -24,6 +27,28 @@ import java.util.jar.JarFile;
 public abstract class ClassTools {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassTools.class);
 
+
+    /**
+     * 获取class中带有组件标记的方法
+     *
+     * @param clazz
+     * @param annotationClass
+     * @return
+     */
+    private List<Method> getMethodsWithAnnotation(Class<?> clazz, Class<?> annotationClass) {
+        List<Method> res = new LinkedList<>();
+        Method[] methods = clazz.getDeclaredMethods();
+        for (Method method : methods) {
+            Annotation[] annotations = method.getAnnotations();
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType() == annotationClass) {
+                    res.add(method);
+                    break;
+                }
+            }
+        }
+        return res;
+    }
 
     /**
      * 获取原始类型,主要处理从被代理的对象中,获取原始参数
@@ -332,5 +357,6 @@ public abstract class ClassTools {
     public static boolean isAbstract(Class cls){
        return Modifier.isAbstract(cls.getModifiers());
     }
+
 
 }

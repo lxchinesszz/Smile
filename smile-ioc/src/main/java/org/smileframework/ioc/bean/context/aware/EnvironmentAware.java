@@ -3,6 +3,7 @@ package org.smileframework.ioc.bean.context.aware;
 import org.smileframework.ioc.bean.core.env.Environment;
 
 /**
+ * 注入环境
  * @author liuxin
  * @version Id: EnvironmentAware.java, v 0.1 2018/10/29 11:29 AM
  */

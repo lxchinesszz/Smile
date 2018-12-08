@@ -13,13 +13,13 @@ import org.smileframework.tool.io.SmileClassPathResource;
 public class SmileApplication {
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext run = org.smileframework.ioc.bean.context.SmileApplication.run(SmileApplication.class, args);
-        System.out.println(run.getBean(BeanB.class).toString());
-        System.out.println(run.getBean(BeanA.class).beanB().toString());
-
-        Environment environment = run.getBean(Environment.class);
-        SmileClassPathResource resource=new SmileClassPathResource("2.gif");
-        SpringImageBanner springImageBanner=new SpringImageBanner(resource.getInputStream());
-        springImageBanner.printBanner(environment,null,System.out);
+//        ConfigurableApplicationContext run = org.smileframework.ioc.bean.context.SmileApplication.run(SmileApplication.class, args);
+//        System.out.println(run.getBean(BeanB.class).toString());
+//        System.out.println(run.getBean(BeanA.class).beanB().toString());
+//
+//        Environment environment = run.getBean(Environment.class);
+//        SmileClassPathResource resource=new SmileClassPathResource("2.gif");
+//        SpringImageBanner springImageBanner=new SpringImageBanner(resource.getInputStream());
+//        springImageBanner.printBanner(environment,null,System.out);
     }
 }

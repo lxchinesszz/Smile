@@ -12,7 +12,6 @@ public class CastConvert {
 
 
 
-
     public static Object cast(Class cls, String value) {
         return cast(cls, value, false);
     }

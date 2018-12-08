@@ -2,6 +2,8 @@ package org.smileframework.ioc.bean.context.beandefinition;
 
 import org.smileframework.ioc.bean.context.beanfactory.ConfigurableBeanFactory;
 
+import java.util.List;
+
 /**
  * @Package: pig.boot.ioc.context
  * @Description: bean描述
@@ -89,5 +91,16 @@ public interface BeanDefinition {
      * Return whether this bean is a candidate for getting autowired into some other bean.
      */
     boolean isAutowireCandidate();
+
+    String getBeanName();
+
+    boolean isFactoryBean();
+
+    List<ConstructorInfo> getConstructorInfo();
+
+
+    Class getBeanClass();
+
+
 
 }

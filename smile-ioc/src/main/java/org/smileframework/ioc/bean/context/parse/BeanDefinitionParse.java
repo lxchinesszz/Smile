@@ -8,5 +8,10 @@ import org.smileframework.ioc.bean.context.beanfactory.impl.DefaultListableBeanF
  */
 public interface BeanDefinitionParse {
 
+    /**
+     * 加载解析到的BeanDefinition到BeanFactory
+     * @param beanFactory bean工厂
+     */
     void loadBeanDefinitionParse(DefaultListableBeanFactory beanFactory);
+
 }

@@ -6,9 +6,12 @@ import org.smileframework.tool.clazz.ReflectionTools;
 import org.smileframework.tool.string.ObjectTools;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * @Package: org.smileframework.tool.annotation
@@ -27,28 +30,62 @@ public class AnnotationTools {
         return Arrays.asList(cls.getAnnotations());
     }
 
-    /**
-     * @param cls         将要判断的类
-     * @param annotations 注解集合
-     * @return 是否将要判断的类上，是否包含注解集合任意注解
-     */
-    public static boolean isContainsAnnotation(Class cls, Class... annotations) {
-        return isContainsAnnotation(cls, Arrays.asList(annotations));
+
+    public static boolean isContainsAnnotation(Annotation[] annotations, Class annotationType) {
+        return isContainsAnnotation(Arrays.asList(annotations), annotationType);
     }
 
-    /**
-     * @param cls         将要判断的类
-     * @param annotations 注解集合
-     * @return 是否将要判断的类上，是否包含注解集合任意注解
-     */
-    public static boolean isContainsAnnotation(Class cls, Collection<Class> annotations) {
-        for (Class annotation : annotations) {
-            if (null != cls.getAnnotation(annotation)) {
+    public static boolean isContainsAnnotation(List<Annotation> annotations, Class annotationType) {
+        for (Annotation annotation : annotations) {
+            Class<? extends Annotation> aClass = annotation.annotationType();
+            if (aClass.isAssignableFrom(annotationType)) {
                 return true;
             }
         }
         return false;
     }
+
+    /**
+     * @param obj         将要判断的类
+     * @param annotations 注解集合
+     * @return 是否将要判断的类上，是否包含注解集合任意注解
+     */
+    public static boolean isContainsAnnotation(Object obj, Class... annotations) {
+        return isContainsAnnotation(obj, Arrays.asList(annotations));
+    }
+
+    /**
+     * @param obj         将要判断的类
+     * @param annotations 注解集合
+     * @return 是否将要判断的类上，是否包含注解集合任意注解
+     */
+    public static boolean isContainsAnnotation(Object obj, Collection<Class<? extends Annotation>> annotations) {
+
+        for (Class<? extends Annotation> annotation : annotations) {
+            if (obj instanceof Class) {
+                if (null != ((Class) obj).getAnnotation(annotation)) {
+                    return true;
+                }
+            }
+            if (obj instanceof Field) {
+                if (null != ((Field) obj).getAnnotation(annotation)) {
+                    return true;
+                }
+            }
+            if (obj instanceof Method) {
+                if (null != ((Method) obj).getAnnotation(annotation)) {
+                    return true;
+                }
+            }
+            if (obj instanceof Constructor) {
+                if (null != ((Constructor) obj).getAnnotation(annotation)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     /**
      * 获取注解对象参数值
@@ -81,7 +118,7 @@ public class AnnotationTools {
      * @param annotationType
      * @return
      */
-    static List<AnnotationAttributes> getAnnotationAttributes(Class<? extends Annotation> annotationType) {
+    public static List<AnnotationAttributes> getAnnotationAttributes(Class<? extends Annotation> annotationType) {
         List<AnnotationAttributes> annotationAttributes = attributeAliasesCache.get(annotationType);
         if (ObjectTools.isNotEmpty(annotationAttributes)) {
             return annotationAttributes;
@@ -107,6 +144,7 @@ public class AnnotationTools {
         return ClassTools.castByArray(declaredMethods, Method.class);
     }
 
+
     /**
      * 查询字节码上面的注解
      *
@@ -122,16 +160,25 @@ public class AnnotationTools {
         return (A) beanCls.getDeclaredAnnotation(annotationType);
     }
 
+    public static <A> A findAnnotation(List<Annotation> annotations, Class<A> annotationType) {
+        for (Annotation annotation : annotations) {
+            if (annotationType.isAssignableFrom(annotation.annotationType())) {
+                return (A) annotation;
+            }
+        }
+        return null;
+    }
+
     /**
      * 获取所有的注解
+     *
      * @param beanCls
      * @return
      */
-    public static List<? extends Annotation> findAnnotations(Class beanCls){
+    public static List<? extends Annotation> findAnnotations(Class beanCls) {
         Annotation[] declaredAnnotations = beanCls.getDeclaredAnnotations();
         return Arrays.asList(declaredAnnotations);
     }
-
 
 
     public static void main(String[] args) throws Exception {

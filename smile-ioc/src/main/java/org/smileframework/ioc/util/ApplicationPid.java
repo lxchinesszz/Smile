@@ -19,7 +19,7 @@ public class ApplicationPid {
         this.pid = pid;
     }
 
-    private static String getPid() {
+    public static String getPid() {
         try {
             String ex = ManagementFactory.getRuntimeMXBean().getName();
             return ex.split("@")[0];

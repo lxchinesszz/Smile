@@ -6,6 +6,7 @@ import org.smileframework.ioc.bean.annotation.ComponentScan;
 import org.smileframework.ioc.bean.annotation.FilterType;
 import org.smileframework.tool.annotation.AnnotationTools;
 import org.smileframework.tool.clazz.ClassTools;
+import org.smileframework.tool.debug.Console;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,12 +29,16 @@ public class AnnotationScanningCandidateClassProvider {
      */
     public Set<Class> scan(Class<?> cls) {
         if (!AnnotationTools.isContainsAnnotation(cls, ComponentScan.class)) {
-            throw new IllegalClassException("cls should contain ComponentScan.class: cls=[" + cls + "] not contain ComponentScan.class");
-
+            System.err.println("cls should contain ComponentScan.class: cls=[" + cls + "] not contain ComponentScan.class");
+            return new HashSet<>();
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         ComponentScan componentScan = cls.getAnnotation(ComponentScan.class);
         String[] scanPackages = componentScan.scanPackages();
+        if (scanPackages.length == 0) {
+            scanPackages = new String[1];
+            scanPackages[0] = ClassTools.getPackageName(cls);
+        }
         Set<Class> classesByPackages = Sets.newConcurrentHashSet();
         for (String packagePath : scanPackages) {
             Set<Class<?>> classesByPackage = null;
@@ -45,8 +50,10 @@ public class AnnotationScanningCandidateClassProvider {
             }
             classesByPackages.addAll(classesByPackage);
         }
-        //TODO 根据类型获取
-        System.out.println(classesByPackages);
+        //打印所有的被扫描到的字节码文件
+        for (Class beanCls:classesByPackages){
+            Console.customerAbnormal(ClassTools.getShortName(beanCls),ClassTools.getPackageName(beanCls));
+        }
         //如果被过滤器匹配到
         List<TypeFilter> typeFilters = typeFiltersFor(componentScan);
         for (TypeFilter typeFilter : typeFilters) {
@@ -77,8 +84,4 @@ public class AnnotationScanningCandidateClassProvider {
         return typeFilters;
     }
 
-
-    public static void main(String[] args) throws Exception {
-        new AnnotationScanningCandidateClassProvider().scan(AnnotationScanningCandidateClassProvider.class);
-    }
 }

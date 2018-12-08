@@ -136,7 +136,7 @@ public class Console {
      */
     public static void customerAbnormal(String title, Object message) {
         Objects.requireNonNull(title, "title not is null");
-        Ansi text = ansi().eraseScreen().fg(RED).a("[" + title + "]: ").reset();
+        Ansi text = ansi().eraseScreen().fg(YELLOW).a("[" + title + "]: ").reset();
         System.out.print(text);
         print(message.toString());
     }

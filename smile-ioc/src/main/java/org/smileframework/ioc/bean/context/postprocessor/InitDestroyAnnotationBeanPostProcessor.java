@@ -2,7 +2,7 @@ package org.smileframework.ioc.bean.context.postprocessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smileframework.ioc.bean.context.SmileAnnotationApplicationContext;
+import org.smileframework.ioc.bean.context.AnnotationConfigApplicationContext;
 import org.smileframework.ioc.bean.context.beandefinition.GenericBeanDefinition;
 import org.smileframework.ioc.bean.context.beanfactory.exception.BeanCreationException;
 import org.smileframework.ioc.util.ReflectionUtils;
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 
-    private Logger logger = LoggerFactory.getLogger(SmileAnnotationApplicationContext.class);
+    private Logger logger = LoggerFactory.getLogger(AnnotationConfigApplicationContext.class);
 
     private Class<? extends Annotation> initAnnotationType;
 

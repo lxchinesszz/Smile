@@ -1,15 +1,9 @@
 package org.smileframework.ioc.bean.context.parse;
 
 import com.google.common.base.Strings;
-import org.smileframework.ioc.bean.annotation.Lazy;
-import org.smileframework.ioc.bean.annotation.Primary;
-import org.smileframework.ioc.bean.annotation.Scope;
-import org.smileframework.ioc.bean.annotation.SmileBean;
+import org.smileframework.ioc.bean.annotation.*;
 import org.smileframework.ioc.bean.context.SmileApplicationContextInitializer;
-import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
-import org.smileframework.ioc.bean.context.beandefinition.ConstructorArgumentValue;
-import org.smileframework.ioc.bean.context.beandefinition.ConstructorArgumentValues;
-import org.smileframework.ioc.bean.context.beandefinition.GenericBeanDefinition;
+import org.smileframework.ioc.bean.context.beandefinition.*;
 import org.smileframework.ioc.bean.context.beanfactory.ConfigurableBeanFactory;
 import org.smileframework.tool.annotation.AnnotationTools;
 import org.smileframework.tool.clazz.ClassTools;
@@ -20,10 +14,7 @@ import org.smileframework.tool.string.StringTools;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -43,11 +34,16 @@ public class DefaultBeanDefinitionParse extends AbstarctBeanDefinitionParse {
 
     static ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
+
+    public DefaultBeanDefinitionParse(Set<Class> classes) {
+        super(classes);
+    }
+
     /**
      * @param beanAnnotations
      * @param classes
      */
-    public DefaultBeanDefinitionParse(Set<Class> beanAnnotations, Set<Class> classes) {
+    public DefaultBeanDefinitionParse(Set<Class<? extends Annotation>> beanAnnotations, Set<Class> classes) {
         super(beanAnnotations, classes);
     }
 
@@ -57,7 +53,7 @@ public class DefaultBeanDefinitionParse extends AbstarctBeanDefinitionParse {
      * @param customerBeanDefinitionParseMap 自定义解析器
      * @param classes                        需要扫描的字节码
      */
-    public DefaultBeanDefinitionParse(Map<Class, CustomerBeanDefinitionParse> customerBeanDefinitionParseMap,
+    public DefaultBeanDefinitionParse(Map<Class<? extends Annotation>, CustomerBeanDefinitionParse> customerBeanDefinitionParseMap,
                                       Set<Class> classes) {
         super(customerBeanDefinitionParseMap, classes);
     }
@@ -66,37 +62,49 @@ public class DefaultBeanDefinitionParse extends AbstarctBeanDefinitionParse {
     @Override
     protected BeanDefinition doLoadBeanDefinition(Class beanCls) {
         Scope scope = AnnotationTools.findAnnotation(beanCls, Scope.class);
-        SmileBean smileBean = AnnotationTools.findAnnotation(beanCls, SmileBean.class);
+        SmileComponent smileComponent = AnnotationTools.findAnnotation(beanCls, SmileComponent.class);
         GenericBeanDefinition genericBeanDefinition = new GenericBeanDefinition();
         genericBeanDefinition.setScope(null == scope ? SCOPE_SINGLETON : scope.value());
         genericBeanDefinition.setBeanClass(beanCls);
         genericBeanDefinition.setAbstractFlag(ClassTools.isAbstract(beanCls));
         genericBeanDefinition.setLazyInit(AnnotationTools.isContainsAnnotation(beanCls, Lazy.class));
         genericBeanDefinition.setPrimary(AnnotationTools.isContainsAnnotation(beanCls, Primary.class));
-        genericBeanDefinition.setConstructorArgumentValues(buildConstructors(beanCls));
-        genericBeanDefinition.setBeanName(null==smileBean? StringTools.uncapitalize(ClassTools.getShortName(beanCls)):smileBean.name());
+        genericBeanDefinition.setBeanName((null == smileComponent || StringTools.isBlank(smileComponent.name())) ? StringTools.uncapitalize(ClassTools.getShortName(beanCls)) : smileComponent.name());
+        //允许用户自定义实例化
+        genericBeanDefinition.setBeforeInstantiationResolved(true);
+        buildConstructors(genericBeanDefinition,beanCls);
         return genericBeanDefinition;
     }
 
 
-    private static ConstructorArgumentValues buildConstructors(Class beanCls) {
+    private static void buildConstructors(GenericBeanDefinition beanDefinition,Class beanCls) {
+        List<ConstructorInfo> constructorInfoList = new ArrayList<>();
         List<Constructor> constructors = Arrays.asList(beanCls.getDeclaredConstructors());
-        ConstructorArgumentValues cas = new ConstructorArgumentValues();
+        boolean emptyConstructorFlag = false;
         for (Constructor constructor : constructors) {
+            ConstructorArgumentValues cas = new ConstructorArgumentValues();
             String[] parameterNames = parameterNameDiscoverer.getParameterNames(constructor);
             Class[] parameterTypes = constructor.getParameterTypes();
+            if (parameterTypes.length==0){
+                emptyConstructorFlag = true;
+            }
+            Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
             for (int i = 0; i < parameterNames.length; i++) {
                 String shortName = ClassTools.getShortName(parameterTypes[i]);
                 ConstructorArgumentValue constructorArgumentValue = new ConstructorArgumentValue(parameterTypes[i],
-                        i, parameterNames[i], shortName, Arrays.asList(parameterTypes[i].getDeclaredAnnotations()));
+                        i, parameterNames[i], shortName, Arrays.asList(parameterAnnotations[i]));
                 cas.addConstructorArgumentValue(constructorArgumentValue);
             }
+            ConstructorInfo constructorInfo = new ConstructorInfo();
+            constructorInfo.setDeclaredAnnotations(Arrays.asList(constructor.getDeclaredAnnotations()));
+            constructorInfo.setConstructorArgumentValues(cas);
+            constructorInfo.setOriginalConstructor(constructor);
+            constructorInfoList.add(constructorInfo);
         }
-        return cas;
+        beanDefinition.setConstructorInfo(constructorInfoList);
+        beanDefinition.setEmptyConstructorFlag(emptyConstructorFlag);
+
     }
 
-    public static void main(String[] args) {
-        ConstructorArgumentValues constructorArgumentValues = buildConstructors(SmileApplicationContextInitializer.class);
-        System.out.println(constructorArgumentValues);
-    }
+
 }

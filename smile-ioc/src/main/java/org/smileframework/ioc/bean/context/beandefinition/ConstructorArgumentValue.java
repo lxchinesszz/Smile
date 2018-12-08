@@ -13,6 +13,9 @@ public class ConstructorArgumentValue {
     private int sort;
     private String varName;
     private String name;
+    /**
+     * 构造上参数的注解
+     */
     private List<Annotation> annotations;
 
     public ConstructorArgumentValue(Class cls, int sort, String varName, String name, List<Annotation> annotations) {
@@ -61,5 +64,16 @@ public class ConstructorArgumentValue {
 
     public void setAnnotations(List<Annotation> annotations) {
         this.annotations = annotations;
+    }
+
+    @Override
+    public String toString() {
+        return "ConstructorArgumentValue{" +
+                "cls=" + cls +
+                ", sort=" + sort +
+                ", varName='" + varName + '\'' +
+                ", name='" + name + '\'' +
+                ", annotations=" + annotations +
+                '}';
     }
 }

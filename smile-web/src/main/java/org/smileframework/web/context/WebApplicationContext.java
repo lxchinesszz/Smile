@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.smileframework.ioc.bean.annotation.SmileComponent;
 import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
 import org.smileframework.ioc.bean.context.ConfigApplicationContext;
-import org.smileframework.ioc.bean.context.ConfigurableEnvironment;
 import org.smileframework.ioc.bean.context.ExtApplicationContext;
+import org.smileframework.ioc.bean.core.env.ConfigurableEnvironment;
+import org.smileframework.ioc.util.ApplicationPid;
+import org.smileframework.tool.annotation.AnnotationTools;
 import org.smileframework.tool.logmanage.LoggerManager;
 import org.smileframework.tool.string.StringTools;
 import org.smileframework.web.annotation.GetMapping;
@@ -19,7 +21,6 @@ import org.smileframework.web.server.dispatch.Web405Definition;
 import org.smileframework.web.server.netty.NettyBootstrapServer;
 import org.smileframework.web.util.WebContextTools;
 import org.smileframework.web.util.WebTools;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,19 +44,35 @@ public class WebApplicationContext implements ExtApplicationContext {
      */
     private static ConfigApplicationContext configApplicationContext;
 
+    private Map<String, BeanDefinition> findControllerBeanDefinition(Map<String, BeanDefinition> beanDefinitioinMap) {
+        Map<String, BeanDefinition> controllerBeanDefinitionMap = new ConcurrentHashMap<>();
+        Consumer<Map.Entry<String, BeanDefinition>> entryConsumer = entry -> {
+            String beanName = entry.getKey();
+            BeanDefinition beanDefinition = entry.getValue();
+            Class beanClass = beanDefinition.getBeanClass();
+            if (AnnotationTools.isContainsAnnotation(beanClass,RestController.class)){
+                controllerBeanDefinitionMap.put(beanName,beanDefinition);
+            }
+        };
+        beanDefinitioinMap.entrySet().forEach(entryConsumer);
+        return controllerBeanDefinitionMap;
+    }
+
     @Override
     public void mergeContext(ConfigApplicationContext extApplicationContext) {
         configApplicationContext = extApplicationContext;
         //获取上下文,绑定url controllerAnnotation
-        Map<String, BeanDefinition> controllerBeans = configApplicationContext.getBeanByAnnotation(RestController.class);
+        Map<String, BeanDefinition> controllerBeans = findControllerBeanDefinition(configApplicationContext.getBeanDefinitioinMap());
         // url和beanDefiniton
         bindUrlAndHandler(controllerBeans);
         WebContextTools.setWebApplicationContext(this);
+
+
+        //TODO 优化成SpringBoot2的方式
         NettyBootstrapServer server = new NettyBootstrapServer();
         ConfigurableEnvironment configurableEnvironment = extApplicationContext.getConfigurableEnvironment();
-//        Integer port = Integer.parseInt(configurableEnvironment.getProperty("server.port","10086"));
-        int port = 10086;
-        String pid = getPid();
+        int port = configurableEnvironment.getProperty("server.port", int.class, 10086);
+        String pid = ApplicationPid.getPid();
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -65,13 +82,6 @@ public class WebApplicationContext implements ExtApplicationContext {
         thread.setDaemon(true);
         thread.setPriority(Thread.MAX_PRIORITY);
         thread.start();
-    }
-
-
-    public String getPid() {
-        String name = ManagementFactory.getRuntimeMXBean().getName();
-        String pid = name.split("@")[0];
-        return pid;
     }
 
     /**
@@ -104,7 +114,7 @@ public class WebApplicationContext implements ExtApplicationContext {
         }
         Consumer<Map.Entry<String, BeanDefinition>> entryConsumer = entry -> {
             BeanDefinition beanDefinition = entry.getValue();
-            Class<?> controllerClass = null;//beanDefinition.getClazz();
+            Class<?> controllerClass = beanDefinition.getBeanClass();
             RestController annotation = controllerClass.getAnnotation(RestController.class);
             String oneUrl = annotation.value();
             Method[] methods = controllerClass.getMethods();
@@ -130,7 +140,7 @@ public class WebApplicationContext implements ExtApplicationContext {
      * @param beanDefinition bean描述
      */
     public void bindGetMethod(String oneUrl, Method method, BeanDefinition beanDefinition) {
-        Object controllerInstance =null;// beanDefinition.getInstance();
+        Object controllerInstance = null;// beanDefinition.getInstance();
         Package aPackage = null;//beanDefinition.getClazz().getPackage();
         GetMapping getMapping = method.getAnnotation(GetMapping.class);
         String twoUrl = getMapping.value();
@@ -153,7 +163,7 @@ public class WebApplicationContext implements ExtApplicationContext {
      */
     public void bindPostMethod(String oneUrl, Method method, BeanDefinition beanDefinition) {
         Object controllerInstance = null;//beanDefinition.getInstance();
-        Package aPackage =null;// beanDefinition.getClazz().getPackage();
+        Package aPackage = null;// beanDefinition.getClazz().getPackage();
         PostMapping postMapping = method.getAnnotation(PostMapping.class);
         String twoUrl = postMapping.value();
         String[] parameterNames = WebTools.getParameterNames(method);

@@ -35,7 +35,6 @@ public class SmileApplicationContextInitializer implements ApplicationContextIni
     @Override
     public ConfigurableApplicationContext initialize(ApplicationContext applicationContext) {
         applicationContext.setStartupDate(System.currentTimeMillis());
-
-        return applicationContext.scan(basePackRoot, args);
+        return null;
     }
 }

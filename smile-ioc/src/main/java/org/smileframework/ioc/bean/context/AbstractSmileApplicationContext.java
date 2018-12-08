@@ -5,20 +5,19 @@ import org.slf4j.LoggerFactory;
 import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
 import org.smileframework.ioc.bean.context.beanfactory.BeanFactory;
 import org.smileframework.ioc.bean.context.beanfactory.ConfigurableBeanFactory;
+import org.smileframework.ioc.bean.context.beanfactory.convert.TypeConverterSupport;
 import org.smileframework.ioc.bean.context.beanfactory.impl.DefaultListableBeanFactory;
 import org.smileframework.ioc.bean.context.postprocessor.impl.ApplicationContextAwareProcessor;
-import org.smileframework.ioc.bean.core.env.Environment;
+import org.smileframework.ioc.bean.context.postprocessor.impl.AutowiredAnnotationBeanPostProcessor;
+import org.smileframework.ioc.bean.core.env.*;
 import org.smileframework.ioc.util.ApplicationPid;
 import org.smileframework.ioc.util.ConcurrentHashSet;
-import org.smileframework.tool.clazz.ClassTools;
 import org.smileframework.tool.date.StopWatch;
 import org.smileframework.tool.properties.PropertiesLoaderTools;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -28,19 +27,17 @@ import java.util.function.Consumer;
  */
 public abstract class AbstractSmileApplicationContext implements ApplicationContext {
 
-    private Logger logger = LoggerFactory.getLogger(SmileAnnotationApplicationContext.class);
+    private Logger logger = LoggerFactory.getLogger(AnnotationConfigApplicationContext.class);
 
+    /**
+     * 带扩展的上下文
+     */
     private static final Set<ExtApplicationContext> extApplicationContexts = new HashSet<>();
 
-    public String basePackRoot;
     /**
      * 启动时间
      */
     private long startTime;
-    /**
-     * 所有的class文件
-     */
-    private static final Set allBeans = new ConcurrentHashSet();
 
     /**
      * 原子分配bean名称,
@@ -51,11 +48,17 @@ public abstract class AbstractSmileApplicationContext implements ApplicationCont
 
     private StopWatch stopWatch;
 
+    /**
+     * 可配置的Bean工厂
+     */
+    private ConfigurableBeanFactory configurableBeanFactory;
 
-    @Override
-    public Set<Class> getAllCLass() {
-        return allBeans;
-    }
+
+    /**
+     * 环境信息
+     */
+    private Environment environment;
+
 
     @Override
     public void addExtApplication(ExtApplicationContext extApplicationContext) {
@@ -64,26 +67,24 @@ public abstract class AbstractSmileApplicationContext implements ApplicationCont
 
 
     public Environment getEnvironment() {
-        return null;
+        return this.environment;
     }
+
+    @Override
+    public void setEnvironment(ConfigurableEnvironment environment) {
+        this.environment = environment;
+    }
+
 
     /**
-     * 根据注解获取bean
+     * 运行扩展类获取bean的副本信息
      *
-     * @param cls
      * @return
      */
-    public Map<String, BeanDefinition> getBeanByAnnotation(Class<? extends Annotation> cls) {
-        Map<String, BeanDefinition> registeredBeans = new ConcurrentHashMap<>();
-//        registeredBeans.entrySet().stream().filter(entry ->
-//                entry.getValue().getClazz().isAnnotationPresent(cls)
-//        ).forEach(entry -> {
-//            registeredBeans.put(entry.getKey(), entry.getValue());
-//        });
-
-        return registeredBeans;
+    @Override
+    public Map<String, BeanDefinition> getBeanDefinitioinMap() {
+        return getBeanFactory().getBeanDefinitioin();
     }
-
 
     /**
      * 处理可配置的信息
@@ -111,6 +112,12 @@ public abstract class AbstractSmileApplicationContext implements ApplicationCont
      */
     protected void prepareBeanFactory(ConfigurableBeanFactory beanFactory) {
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+        AutowiredAnnotationBeanPostProcessor autowiredAnnotationBeanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
+        autowiredAnnotationBeanPostProcessor.setBeanFactory((BeanFactory) beanFactory);
+        beanFactory.addBeanPostProcessor(autowiredAnnotationBeanPostProcessor);
+        beanFactory.setPropertyResolver(getEnvironment());
+        //属性转换器
+        beanFactory.setTypeConverter(new TypeConverterSupport());
     }
 
     /**
@@ -168,12 +175,9 @@ public abstract class AbstractSmileApplicationContext implements ApplicationCont
 
     /**
      * 扫描所有的类,并装载
-     *
-     * @param basePackRoot
+     * 当调用该方法spring就开始启动工作
      */
-    @Override
-    public ConfigurableApplicationContext scan(String basePackRoot, String[] args) {
-        this.basePackRoot = basePackRoot;
+    public void refresh() {
         stopWatch = new StopWatch();
         stopWatch.start();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -184,15 +188,14 @@ public abstract class AbstractSmileApplicationContext implements ApplicationCont
          */
         //TODO 读取配置信息 创建Properties
         PropertiesLoaderTools.loadProperties();
-        ConfigurableEnvironment configurableEnvironment = this.prepareEnvironment(args, new Properties());
-        Map<String, String> systemEnvironment = configurableEnvironment.getSystemEnvironment();
+//        prepareEnvironment(args, new Properties());
+
 //        Banner.printBanner(configurableEnvironment.getProperty("server.banner", "D3Banner"));
-        Boolean isPrintClass = Boolean.parseBoolean(systemEnvironment.getOrDefault("server.classLoad", "false"));
+//        Boolean isPrintClass = Boolean.parseBoolean(systemEnvironment.getOrDefault("server.classLoad", "false"));
         logger.info("The current application system pid:[" + new ApplicationPid() + "]");
 
         //注意 创建一个BeanFactory以后的操作都围绕这个来
         ConfigurableBeanFactory beanFactory = getBeanFactory();
-
         //注意 预处理设置某些解析器等等，给自来来实现
         prepareBeanFactory(beanFactory);
 
@@ -208,24 +211,6 @@ public abstract class AbstractSmileApplicationContext implements ApplicationCont
 
         //注意 最后要做的事情
         finishRefresh();
-
-
-        Set<Class<?>> classesByPackage = null;
-        try {
-            /**
-             * recursively 是否从根目录,向下查找
-             */
-            classesByPackage = ClassTools.getClassesByPackageName(classLoader, basePackRoot, true, isPrintClass);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        /**
-         * 因为allBean 使用final修饰,引用地址不能改变,所以另外添加:加载到所有的bean
-         */
-        allBeans.addAll(classesByPackage);
-
-
-        return null;
     }
 
 
@@ -247,13 +232,6 @@ public abstract class AbstractSmileApplicationContext implements ApplicationCont
      */
     public abstract void loadBeanDefinition(ConfigurableBeanFactory smileBeanFactory);
 
-    /**
-     * 扫描所有被标记的组件
-     * TODO 第一版本，扫描时候直接就生成了实例,并注入依赖，如果没有生成就放到延迟队列中
-     * TODO 第二版本，不直接生成实例,而是生成详细的BeanDefinition，并且构建声明周期
-     */
-    abstract void scanComponent(Class<?> nextCls);
-
 
     /**
      * 为方法中可能重复的beanname,如果已经包含就重新命名
@@ -269,28 +247,6 @@ public abstract class AbstractSmileApplicationContext implements ApplicationCont
         }
         String simpleName = cls.getSimpleName();
         return simpleName.substring(0, 1).toLowerCase() + simpleName.substring(1, simpleName.length());
-    }
-
-    /**
-     * 获取class中带有组件标记的方法
-     *
-     * @param clazz
-     * @param annotationClass
-     * @return
-     */
-    private List<Method> getMethodsWithAnnotation(Class<?> clazz, Class<?> annotationClass) {
-        List<Method> res = new LinkedList<>();
-        Method[] methods = clazz.getDeclaredMethods();
-        for (Method method : methods) {
-            Annotation[] annotations = method.getAnnotations();
-            for (Annotation annotation : annotations) {
-                if (annotation.annotationType() == annotationClass) {
-                    res.add(method);
-                    break;
-                }
-            }
-        }
-        return res;
     }
 
 
@@ -329,10 +285,6 @@ public abstract class AbstractSmileApplicationContext implements ApplicationCont
         return stopWatch;
     }
 
-    @Override
-    public Map<String, BeanDefinition> getBeans() {
-        return null;
-    }
 
     @Override
     public Object getBean(String var1) {

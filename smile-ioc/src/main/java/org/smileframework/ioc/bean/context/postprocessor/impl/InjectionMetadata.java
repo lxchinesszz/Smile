@@ -19,6 +19,7 @@ import java.util.Set;
  * @version Id: InjectionMetadata.java, v 0.1 2018/10/30 2:40 PM
  */
 public class InjectionMetadata {
+
     private final Log logger = LogFactory.getLog(InjectionMetadata.class);
 
     private final Class<?> targetClass;
@@ -27,6 +28,9 @@ public class InjectionMetadata {
 
     private volatile Set<InjectedElement> checkedElements;
 
+    public boolean isDependency(){
+        return injectedElements.isEmpty();
+    }
 
     public InjectionMetadata(Class<?> targetClass, Collection<InjectedElement> elements) {
         this.targetClass = targetClass;
@@ -121,9 +125,6 @@ public class InjectionMetadata {
                 ReflectionUtils.makeAccessible(field);
                 field.set(target, getResourceToInject(target, requestingBeanName));
             } else {
-                if (checkPropertySkipping(pvs)) {
-                    return;
-                }
                 try {
                     Method method = (Method) this.member;
                     ReflectionUtils.makeAccessible(method);
@@ -134,36 +135,7 @@ public class InjectionMetadata {
             }
         }
 
-        /**
-         * Checks whether this injector's property needs to be skipped due to
-         * an explicit property value having been specified. Also marks the
-         * affected property as processed for other processors to ignore it.
-         */
-        protected boolean checkPropertySkipping(PropertyValues pvs) {
-            if (this.skip != null) {
-                return this.skip;
-            }
-            if (pvs == null) {
-                this.skip = false;
-                return false;
-            }
-            synchronized (pvs) {
-                if (this.skip != null) {
-                    return this.skip;
-                }
-                if (this.pd != null) {
-                    if (pvs.contains(this.pd.getName())) {
-                        // Explicit value provided as part of the bean definition.
-                        this.skip = true;
-                        return true;
-                    } else if (pvs instanceof MutablePropertyValues) {
-                        ((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
-                    }
-                }
-                this.skip = false;
-                return false;
-            }
-        }
+
 
         /**
          * Either this or {@link #inject} needs to be overridden.

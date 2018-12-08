@@ -1,6 +1,7 @@
 package org.smileframework.ioc.bean.context;
 
 import org.smileframework.ioc.bean.context.beandefinition.BeanDefinition;
+import org.smileframework.ioc.bean.core.env.ConfigurableEnvironment;
 import org.smileframework.tool.date.StopWatch;
 
 import java.lang.annotation.Annotation;
@@ -66,74 +67,14 @@ public class ConfigurableApplicationContext implements ConfigApplicationContext 
         return null;
     }
 
+
     @Override
-    public Map<String, BeanDefinition> getBeans() {
-        return registeredBeans;
+    public void setEnvironment(ConfigurableEnvironment environment) {
+
     }
 
-//    @Override
-//    public void addExtApplication(ExtApplicationContext extApplicationContext) {
-//        extApplicationContexts.add(extApplicationContext);
-//    }
-
     @Override
-    public Object getBean(String beanName) {
-        BeanDefinition beanDefinition = registeredBeans.get(beanName);
-//        return beanDefinition.getInstance();
+    public Map<String, BeanDefinition> getBeanDefinitioinMap() {
         return null;
-    }
-
-    @Override
-    public <T> T getBean(String beanName, Class<T> requiredType) {
-        BeanDefinition beanDefinition = registeredBeans.get(beanName);
-//        return (requiredType.cast(beanDefinition.getInstance()));
-        return null;
-    }
-
-    @Override
-    public <T> T getBean(Class<T> beanType) {
-        Map<String, T> beanByType = getBeanByType(beanType);
-        return beanByType.isEmpty() ? null : beanType.cast(beanByType.values().toArray()[0]);
-    }
-
-    /**
-     * @param cls bean类型
-     *            从已经注册过的ioc容器中,过滤查询到
-     * @param <T>
-     * @return
-     */
-    public <T> Map<String, T> getBeanByType(Class<T> cls) {
-        Map<String, T> res = new HashMap<>();
-//        registeredBeans.entrySet().stream().filter(entry ->
-//                entry.getValue().getClazz().isAssignableFrom(cls)
-//        ).forEach(entry -> {
-//            res.put(entry.getKey(), cls.cast(entry.getValue().getInstance()));
-//        });
-        return res;
-    }
-
-
-    @Override
-    public boolean containsBean(String beanName) {
-        BeanDefinition beanDefinition = registeredBeans.get(beanName);
-        return beanDefinition != null;
-    }
-
-    /**
-     * 根据注解获取bean
-     *
-     * @param cls
-     * @return
-     */
-    @Override
-    public Map<String, BeanDefinition> getBeanByAnnotation(Class<? extends Annotation> cls) {
-        Map<String, BeanDefinition> registeredAnnotationBeans = new ConcurrentHashMap<>();
-//        registeredBeans.entrySet().stream().filter(entry ->
-//                entry.getValue().getClazz().isAnnotationPresent(cls)
-//        ).forEach(entry -> {
-//            registeredAnnotationBeans.put(entry.getKey(), entry.getValue());
-//        });
-
-        return registeredAnnotationBeans;
     }
 }

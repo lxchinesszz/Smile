@@ -17,9 +17,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
     private String valueSeparator = ":";
 
-
     private boolean ignoreUnresolvableNestedPlaceholders = false;
-
 
     private PropertyPlaceholderHelper nonStrictHelper;
 

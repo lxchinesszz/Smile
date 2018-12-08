@@ -6,10 +6,6 @@ import org.apdplat.word.segmentation.Word;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.smileframework.tool.http.BlmHttpsClients;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -19,9 +15,6 @@ import java.util.*;
  * @date: 2018/4/13 上午10:49
  */
 public class VarNameTools {
-    private final static String PreUrl = "http://www.baidu.com/s?wd=";                        //百度搜索URL
-    private final static String TransResultStartFlag = "<span class=\"op_dict_text2\">";      //翻译开始标签
-    private final static String TransResultEndFlag = "</span>";                               //翻译结束标签
     private final static Map<String, String> matchEnglish = Maps.newHashMap();
     private final static Map<String, String> matchChinese = Maps.newHashMap();
     private final static Map<String, String> matchAllReplace = Maps.newHashMap();
@@ -192,38 +185,13 @@ public class VarNameTools {
         for (int i = 0, len = words.size(); i < len; i++) {
             String text = words.get(i).getText();
             boolean chineseMatching = matchChinese.containsKey(text);
-            text = matchingChiness(text);
+            text = matchingChinese(text);
             varName.append(createSubName(translate(text, type), chineseMatching));
         }
         String uncapitalize = StringTools.uncapitalize(varName.toString());
         return formatOutput(uncapitalize);
     }
 
-    private static String getTranslateResult(String urlString) throws Exception {    //传入要搜索的单词
-        URL url = new URL(PreUrl + urlString);            //生成完整的URL
-        // 打开URL
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        // 得到输入流，即获得了网页的内容
-        BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-        String preLine = "";
-        String line;
-        int flag = 1;
-        // 读取输入流的数据，并显示
-        String content = "";          //翻译结果
-        while ((line = reader.readLine()) != null) {            //获取翻译结果的算法
-            if (preLine.indexOf(TransResultStartFlag) != -1 && line.indexOf(TransResultEndFlag) == -1) {
-                content += line.replaceAll("　| ", "") + "\n";   //去电源代码上面的半角以及全角字符
-                flag = 0;
-            }
-            if (line.indexOf(TransResultEndFlag) != -1) {
-                flag = 1;
-            }
-            if (flag == 1) {
-                preLine = line;
-            }
-        }
-        return content;//返回翻译结果}
-    }
 
 
     private static List<JSONObject> translate(String translateText) {
@@ -296,7 +264,7 @@ public class VarNameTools {
     }
 
 
-    private static String matchingChiness(String word) {
+    private static String matchingChinese(String word) {
         String value = matchChinese.get(word.trim());
         return !StringTools.isBlank(value) ? value : word;
     }
@@ -305,7 +273,6 @@ public class VarNameTools {
         String value = matchAllReplace.get(word.toLowerCase());
         return !StringTools.isBlank(value) ? value : word;
     }
-
 
 
     private static String formatOutput(String variableName) {

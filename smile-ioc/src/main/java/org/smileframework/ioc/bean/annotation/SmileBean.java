@@ -8,7 +8,7 @@ import java.lang.annotation.*;
  * @author: liuxin
  * @date: 2017/11/18 下午2:06
  */
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD,ElementType.TYPE,ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface SmileBean {

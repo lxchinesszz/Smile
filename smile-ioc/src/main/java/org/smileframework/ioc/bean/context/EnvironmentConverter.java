@@ -1,5 +1,6 @@
 package org.smileframework.ioc.bean.context;
 
+import org.smileframework.ioc.bean.core.env.ConfigurableEnvironment;
 import org.smileframework.ioc.util.SmileCommandLineArgsParser;
 
 import java.util.Map;
@@ -8,19 +9,20 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 /**
  * Copyright (c) 2015 The Smile-Boot Project
- *
+ * <p>
  * Licensed under the Apache License, version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at:
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * @Package: org.smileframework.ioc.bean.context
  * @Description: 环境信息
@@ -33,7 +35,7 @@ public class EnvironmentConverter implements ConfigurableEnvironment {
 
     private Properties properties;
 
-    private Map<String,String> systemEnvironment;
+    private Map<String, Object> systemEnvironment;
 
     public EnvironmentConverter(String[] args, Properties properties) {
         this.commandLineArgs = new SmileCommandLineArgsParser().parse(args);
@@ -45,7 +47,7 @@ public class EnvironmentConverter implements ConfigurableEnvironment {
      * @param key
      * @return
      */
-
+    @Override
     public String getProperty(String key) {
         return properties.getProperty(key);
     }
@@ -56,9 +58,9 @@ public class EnvironmentConverter implements ConfigurableEnvironment {
      * @param defaultValue
      * @return
      */
-
+    @Override
     public String getProperty(String key, String defaultValue) {
-        return properties.getProperty(key,defaultValue);
+        return properties.getProperty(key, defaultValue);
     }
 
     /**
@@ -83,34 +85,89 @@ public class EnvironmentConverter implements ConfigurableEnvironment {
     }
 
 
-    public <T> T getProperty(String var1, Class<?> targetType, T defaultValue) {
-        return null;
-    }
+//    public <T> T getProperty(String var1, Class<?> targetType, T defaultValue) {
+//        return null;
+//    }
 
     /**
      * 系统配置信息
      * @return
      */
     @Override
-    public Map<String, String> getSystemEnvironment() {
-        if (systemEnvironment==null){
-            systemEnvironment=new ConcurrentHashMap<>();
+    public Map<String, Object> getSystemEnvironment() {
+        if (systemEnvironment == null) {
+            systemEnvironment = new ConcurrentHashMap<>();
             Set<String> optionNames = commandLineArgs.getOptionNames();
-            optionNames.forEach(option->{
+            optionNames.forEach(option -> {
                 String optionValue = commandLineArgs.getOptionValue(option);
-                systemEnvironment.put(option,optionValue);
+                systemEnvironment.put(option, optionValue);
             });
         }
         return systemEnvironment;
     }
 
     @Override
-    public Properties getSystemProperties() {
-        return System.getProperties();
+    public Map<String, Object> getSystemProperties() {
+        return null;
     }
 
     @Override
     public void merge(ConfigurableEnvironment var1) {
 
+    }
+
+    @Override
+    public String[] getActiveProfiles() {
+        return new String[0];
+    }
+
+    @Override
+    public String[] getDefaultProfiles() {
+        return new String[0];
+    }
+
+    @Override
+    public boolean acceptsProfiles(String... profiles) {
+        return false;
+    }
+
+    @Override
+    public boolean containsProperty(String key) {
+        return false;
+    }
+
+    @Override
+    public <T> T getProperty(String key, Class<T> targetType) {
+        return null;
+    }
+
+    @Override
+    public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+        return null;
+    }
+
+    @Override
+    public <T> Class<T> getPropertyAsClass(String key, Class<T> targetType) {
+        return null;
+    }
+
+    @Override
+    public String getRequiredProperty(String key) throws IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public <T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public String resolvePlaceholders(String text) {
+        return null;
+    }
+
+    @Override
+    public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
+        return null;
     }
 }
